@@ -4,15 +4,19 @@ import (
 	"fmt"
 	"testing"
 
+	//"github.com/rogpeppe/go-internal/module"
+	//"github.com/serlip06/pointsalesofkantin/model"
+	"github.com/serlip06/pointsalesofkantin/module"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestInsertPelanggan(t *testing.T) {
-	nama := "Hyunmin "
-	phoneNumber := "08123456789"
+	nama := "Aksara Dirgantara "
+	phoneNumber := "08577908763"
 	alamat := "Jalan Dirgantara No. 50"
-	email := []string{"Hyunmin256@example.com", "Hyunmin67@example.com"}
-	insertedID := InsertPelanggan(nama, phoneNumber, alamat, email)
+	email := []string{"Aksara90@example.com", "Askara67@example.com"}
+	insertedID := module.InsertPelanggan(nama, phoneNumber, alamat, email)
 	fmt.Println(insertedID)
 }
 
@@ -22,19 +26,19 @@ func TestGetPelangganByID(t *testing.T) {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	pelanggan := GetPelangganByID(pelangganID)
+	pelanggan := module.GetPelangganByID(pelangganID)
 	fmt.Println(pelanggan)
 }
 func TestGetAllPelanggan(t *testing.T) {
-	pelanggans := GetAllPelanggan()
+	pelanggans := module.GetAllPelanggan()
 	fmt.Println(pelanggans)
 }
 
 func TestInsertProduk(t *testing.T) {
-	namaProduk := "Martabak Manis Kacang Coklat"
-	deskripsi := "Martabak manis melimpah akan toping"
+	namaProduk := "Martabak Telor"
+	deskripsi := "Martabak Asin melipah akan toping dagingnya"
 	harga := 25000
-	insertedID := InsertProduk(namaProduk, deskripsi, harga)
+	insertedID := module.InsertProduk(namaProduk, deskripsi, harga)
 	fmt.Println(insertedID)
 }
 
@@ -44,19 +48,19 @@ func TestGetProdukByID(t *testing.T) {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	produk := GetProdukByID(produkID)
+	produk := module.GetProdukByID(produkID)
 	fmt.Println(produk)
 }
 
 func TestGetAllProduk(t *testing.T) {
-	produks := GetAllProduk()
+	produks := module.GetAllProduk()
 	fmt.Println(produks)
 }
 
 func TestInsertTransaksi(t *testing.T) {
-	metodePembayaran := "Transfer Bank"
+	metodePembayaran := "Cash On Delivery"
 	tanggalWaktu := "2024-03-28 10:00:00"
-	insertedID := InsertTransaksi(metodePembayaran, tanggalWaktu)
+	insertedID := module.InsertTransaksi(metodePembayaran, tanggalWaktu)
 	fmt.Println(insertedID)
 }
 
@@ -66,10 +70,10 @@ func TestGetTransaksiByID(t *testing.T) {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	transaksi := GetTransaksiByID(transaksiID)
+	transaksi := module.GetTransaksiByID(transaksiID)
 	fmt.Println(transaksi)
 }
 func TestGetAllTransaksi(t *testing.T) {
-	transaksis := GetAllTransaksi()
+	transaksis := module.GetAllTransaksi()
 	fmt.Println(transaksis)
 }

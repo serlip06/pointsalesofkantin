@@ -1,10 +1,11 @@
-package _714220023
+package module
 
 import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/serlip06/pointsalesofkantin/model"
 	
 	//"os"
 	//"time"
@@ -34,7 +35,7 @@ func InsertOneDoc(dbname, collection string, doc interface{}) interface{} {
 }
 
 func InsertPelanggan(nama string, phoneNumber string, alamat string, email []string) interface{} {
-	var pelanggan  Pelanggan
+	var pelanggan  model.Pelanggan
 	pelanggan.ID = primitive.NewObjectID()
 	pelanggan.Nama = nama
 	pelanggan.Phone_number = phoneNumber
@@ -43,7 +44,7 @@ func InsertPelanggan(nama string, phoneNumber string, alamat string, email []str
 	return InsertOneDoc("kantin", "kantin_pelanggan", pelanggan)
 }
 
-func GetPelangganByID(pelangganID primitive.ObjectID) (pelanggan Pelanggan) {
+func GetPelangganByID(pelangganID primitive.ObjectID) (pelanggan model.Pelanggan) {
 	collection := MongoConnect("kantin").Collection("kantin_pelanggan")
 	filter := bson.M{"_id": pelangganID}
 	err := collection.FindOne(context.TODO(), filter).Decode(&pelanggan)
@@ -53,7 +54,7 @@ func GetPelangganByID(pelangganID primitive.ObjectID) (pelanggan Pelanggan) {
 	return pelanggan
 }
 
-func GetAllPelanggan() (pelanggans []Pelanggan) {
+func GetAllPelanggan() (pelanggans [] model.Pelanggan) {
 	collection := MongoConnect("kantin").Collection("kantin_pelanggan")
 	cursor, err := collection.Find(context.TODO(), bson.D{})
 	if err != nil {
@@ -62,7 +63,7 @@ func GetAllPelanggan() (pelanggans []Pelanggan) {
 	}
 	defer cursor.Close(context.TODO())
 	for cursor.Next(context.Background()) {
-		var pelanggan Pelanggan
+		var pelanggan model.Pelanggan
 		if err := cursor.Decode(&pelanggan); err != nil {
 			fmt.Printf("GetAllPelanggan: %v\n", err)
 			continue
@@ -76,7 +77,7 @@ func GetAllPelanggan() (pelanggans []Pelanggan) {
 }
 
 func InsertProduk(namaProduk string, deskripsi string, harga int) interface{} {
-	var produk Produk
+	var produk model.Produk
 	produk.ID = primitive.NewObjectID()
 	produk.Nama_Produk = namaProduk
 	produk.Deskripsi = deskripsi
@@ -84,7 +85,7 @@ func InsertProduk(namaProduk string, deskripsi string, harga int) interface{} {
 	return InsertOneDoc("kantin", "Menu_produk", produk)
 }
 
-func GetProdukByID(produkID primitive.ObjectID) (produk Produk) {
+func GetProdukByID(produkID primitive.ObjectID) (produk model.Produk) {
 	collection := MongoConnect("kantin").Collection("Menu_produk")
 	filter := bson.M{"_id": produkID}
 	err := collection.FindOne(context.TODO(), filter).Decode(&produk)
@@ -94,7 +95,7 @@ func GetProdukByID(produkID primitive.ObjectID) (produk Produk) {
 	return produk
 }
 
-func GetAllProduk() (produks []Produk) {
+func GetAllProduk() (produks [] model.Produk) {
 	collection := MongoConnect("kantin").Collection("Menu_produk")
 	cursor, err := collection.Find(context.TODO(), bson.D{})
 	if err != nil {
@@ -103,7 +104,7 @@ func GetAllProduk() (produks []Produk) {
 	}
 	defer cursor.Close(context.TODO())
 	for cursor.Next(context.Background()) {
-		var produk Produk
+		var produk model.Produk
 		if err := cursor.Decode(&produk); err != nil {
 			fmt.Printf("GetAllProduk: %v\n", err)
 			continue
@@ -117,14 +118,14 @@ func GetAllProduk() (produks []Produk) {
 }
 
 func InsertTransaksi(metodePembayaran string, tanggalWaktu string) interface{} {
-	var transaksi Transaksi
+	var transaksi model.Transaksi
 	transaksi.ID = primitive.NewObjectID()
 	transaksi.Metode_Pembayaran = metodePembayaran
 	transaksi.Tanggal_Waktu = tanggalWaktu
 	return InsertOneDoc("kantin", "kantin_transaksi", transaksi)
 }
 
-func GetTransaksiByID(transaksiID primitive.ObjectID) (transaksi Transaksi) {
+func GetTransaksiByID(transaksiID primitive.ObjectID) (transaksi model.Transaksi) {
 	collection := MongoConnect("kantin").Collection("kantin_transaksi")
 	filter := bson.M{"_id": transaksiID}
 	err := collection.FindOne(context.TODO(), filter).Decode(&transaksi)
@@ -134,7 +135,7 @@ func GetTransaksiByID(transaksiID primitive.ObjectID) (transaksi Transaksi) {
 	return transaksi
 }
 
-func GetAllTransaksi() (transaksis []Transaksi) {
+func GetAllTransaksi() (transaksis [] model.Transaksi) {
 	collection := MongoConnect("kantin").Collection("kantin_transaksi")
 	cursor, err := collection.Find(context.TODO(), bson.D{})
 	if err != nil {
@@ -143,7 +144,7 @@ func GetAllTransaksi() (transaksis []Transaksi) {
 	}
 	defer cursor.Close(context.TODO())
 	for cursor.Next(context.Background()) {
-		var transaksi Transaksi
+		var transaksi model.Transaksi
 		if err := cursor.Decode(&transaksi); err != nil {
 			fmt.Printf("GetAllTransaksi: %v\n", err)
 			continue
