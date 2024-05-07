@@ -6,16 +6,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	
-	"os"
+	//"os"
 	//"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MongoString string = os.Getenv("MONGOSTRING")
+//var MongoString string = os.Getenv("MONGOSTRING")
 
-func MongoConnect(dbname string) *mongo.Database {
+func MongoConnect(dbname string) (db *mongo.Database)  {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(MongoString))
 	if err != nil {
 		fmt.Printf("MongoConnect: %v\n", err)
@@ -34,7 +34,7 @@ func InsertOneDoc(dbname, collection string, doc interface{}) interface{} {
 }
 
 func InsertPelanggan(nama string, phoneNumber string, alamat string, email []string) interface{} {
-	var pelanggan Pelanggan
+	var pelanggan  Pelanggan
 	pelanggan.ID = primitive.NewObjectID()
 	pelanggan.Nama = nama
 	pelanggan.Phone_number = phoneNumber
