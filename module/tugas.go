@@ -2,11 +2,13 @@ package module
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	"github.com/serlip06/pointsalesofkantin/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"github.com/serlip06/pointsalesofkantin/model"
-	
+
 	//"os"
 	//"time"
 
@@ -44,15 +46,16 @@ func InsertPelanggan(nama string, phoneNumber string, alamat string, email []str
 	return InsertOneDoc("kantin", "kantin_pelanggan", pelanggan)
 }
 
-func GetPelangganByID(pelangganID primitive.ObjectID) (pelanggan model.Pelanggan) {
-	collection := MongoConnect("kantin").Collection("kantin_pelanggan")
+func GetPelangganByID(pelangganID primitive.ObjectID, db *mongo.Database, collectionName string) (pelanggan model.Pelanggan, err error) {
+	collection := db.Collection(collectionName)
 	filter := bson.M{"_id": pelangganID}
-	err := collection.FindOne(context.TODO(), filter).Decode(&pelanggan)
+	err = collection.FindOne(context.TODO(), filter).Decode(&pelanggan)
 	if err != nil {
 		fmt.Printf("GetPelangganByID: %v\n", err)
 	}
-	return pelanggan
+	return pelanggan, err
 }
+
 
 func GetAllPelanggan() (pelanggans [] model.Pelanggan) {
 	collection := MongoConnect("kantin").Collection("kantin_pelanggan")
@@ -155,4 +158,139 @@ func GetAllTransaksi() (transaksis [] model.Transaksi) {
 		fmt.Printf("GetAllTransaksi: %v\n", err)
 	}
 	return transaksis
+}
+
+// update function
+func UpdatePelanggan(db *mongo.Database, col string, id primitive.ObjectID, nama string, phonenumber string, alamat string, email []string) (err error) {
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$set": bson.M{
+			"nama":         nama,
+			"phone_number": phonenumber,
+			"alamat":       alamat,
+			"email":        email,
+		},
+	}
+	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		fmt.Printf("UpdatePelanggan: %v\n", err)
+		return
+	}
+	if result.ModifiedCount == 0 {
+		err = errors.New("no data has been changed with the specified ID")
+		return
+	}
+	return nil
+}
+//function delete 
+func DeletePelangganByID(_id primitive.ObjectID, db *mongo.Database, col string) error {
+	Pelanggan := db.Collection(col)
+	filter := bson.M{"_id": _id}
+
+	result, err := Pelanggan.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return fmt.Errorf("error deleting data for ID %s: %s", _id, err.Error())
+	}
+
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("data with ID %s not found", _id)
+	}
+
+	return nil
+}
+
+//function untuk bagian customer 
+func InsertCustomer(nama string, phoneNumber string, alamat string, email []string, namaProduk string, deskripsi string, harga int, gambar string, stok string) interface{} {
+	var customer model.Customer
+	customer.ID = primitive.NewObjectID()
+	customer.Nama = nama
+	customer.Phone_number = phoneNumber
+	customer.Alamat = alamat
+	customer.Email = email
+	customer.Nama_Produk = namaProduk
+	customer.Deskripsi = deskripsi
+	customer.Harga = harga
+	customer.Gambar = gambar
+	customer.Stok = stok
+	return InsertOneDoc("kantin", "customer", customer)
+}
+
+func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (customer model.Customer, errs error) {
+	karyawan := db.Collection(col)
+	filter := bson.M{"_id": _id}
+	err := karyawan.FindOne(context.TODO(), filter).Decode(&customer)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return customer, fmt.Errorf("no data found for ID %s", _id)
+		}
+		return customer, fmt.Errorf("error retrieving data for ID %s: %s", _id, err.Error())
+	}
+	return customer, nil
+}
+func GetAllCustomer() (customers [] model.Customer) {
+	collection := MongoConnect("kantin").Collection("customer")
+	cursor, err := collection.Find(context.TODO(), bson.D{})
+	if err != nil {
+		fmt.Printf("GetAllCustomer: %v\n", err)
+		return nil
+	}
+	defer cursor.Close(context.TODO())
+	for cursor.Next(context.Background()) {
+		var customer model.Customer
+		if err := cursor.Decode(&customer); err != nil {
+			fmt.Printf("GetAllCustomer: %v\n", err)
+			continue
+		}
+		customers = append(customers, customer )
+	}
+	if err := cursor.Err(); err != nil {
+		fmt.Printf("GetAllPelanggan: %v\n", err)
+	}
+	return customers
+}
+
+// function update dan delete untuk data customer 
+//function update 
+func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama string, phoneNumber string, alamat string, email []string, namaProduk string, deskripsi string, harga int, gambar string, stok string) (err error) {
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$set": bson.M{
+			"nama":          nama,
+			"phone_number":  phoneNumber,
+			"alamat":        alamat,
+			"email":         email,
+			"nama_produk":   namaProduk,
+			"deskripsi":     deskripsi,
+			"harga":         harga,
+			"gambar":        gambar,
+			"stok":          stok,
+		},
+	}
+	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		fmt.Printf("UpdateCustomer: %v\n", err)
+		return err
+	}
+	if result.ModifiedCount == 0 {
+		err = errors.New("no data has been changed with the specified ID")
+		return err
+	}
+	return nil
+}
+
+// function delete
+func DeleteCustomerByID(_id primitive.ObjectID, db *mongo.Database, col string) error {
+	Customer := db.Collection(col)
+	filter := bson.M{"_id": _id}
+
+	result, err := Customer.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return fmt.Errorf("error deleting data for ID %s: %s", _id, err.Error())
+	}
+
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("data with ID %s not found", _id)
+	}
+
+	return nil
 }
