@@ -31,7 +31,7 @@ type Customer struct {
 	Nama         string             `bson:"nama,omitempty" json:"nama,omitempty"`
 	Phone_number string             `bson:"phone_number,omitempty" json:"phone_number,omitempty"`
 	Alamat       string             `bson:"alamat,omitempty" json:"alamat,omitempty"`
-	Email        []string           `bson:"email,omitempty" json:"email,omitempty"`
+	Email        []string           `bson:"email,omitempty" json:"email"`
 	Nama_Produk  string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"`
 	Deskripsi    string             `bson:"deskripsi,omitempty" json:"deskripsi,omitempty"`
 	Harga        int                `bson:"harga,omitempty" json:"harga,omitempty"`
