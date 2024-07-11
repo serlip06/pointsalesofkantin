@@ -269,11 +269,11 @@ func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama 
 	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		fmt.Printf("UpdateCustomer: %v\n", err)
-		return err
+		return 
 	}
 	if result.ModifiedCount == 0 {
 		err = errors.New("no data has been changed with the specified ID")
-		return err
+		return 
 	}
 	return nil
 }
