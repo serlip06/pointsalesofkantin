@@ -216,9 +216,9 @@ func InsertCustomer(nama string, phoneNumber string, alamat string, email []stri
 }
 
 func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (customer model.Customer, errs error) {
-	karyawan := db.Collection(col)
+	Customer := db.Collection(col)
 	filter := bson.M{"_id": _id}
-	err := karyawan.FindOne(context.TODO(), filter).Decode(&customer)
+	err := Customer.FindOne(context.TODO(), filter).Decode(&customer)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return customer, fmt.Errorf("no data found for ID %s", _id)
