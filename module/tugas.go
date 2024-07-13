@@ -214,7 +214,6 @@ func InsertCustomer(nama string, phoneNumber string, alamat string, email []stri
 	customer.Stok = stok
 	return InsertOneDoc("kantin", "customer", customer)
 }
-
 func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (customer model.Customer, errs error) {
 	Customer := db.Collection(col)
 	filter := bson.M{"_id": _id}
@@ -227,6 +226,17 @@ func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (
 	}
 	return customer, nil
 }
+
+func GetCustomerByID(customerID primitive.ObjectID, db *mongo.Database, collectionName string) (customer model.Customer, err error) {
+	collection := db.Collection(collectionName)
+	filter := bson.M{"_id": customerID}
+	err = collection.FindOne(context.TODO(), filter).Decode(&customer)
+	if err != nil {
+		fmt.Printf("GetCutomerByID: %v\n", err)
+	}
+	return customer, err
+}
+
 func GetAllCustomer() (customers [] model.Customer) {
 	collection := MongoConnect("kantin").Collection("customer")
 	cursor, err := collection.Find(context.TODO(), bson.D{})
