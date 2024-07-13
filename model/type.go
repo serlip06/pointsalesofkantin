@@ -27,7 +27,7 @@ type Transaksi struct {
 }
 
 type Customer struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty" example:"123456789"`
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Nama         string             `bson:"nama,omitempty" json:"nama,omitempty"`
 	Phone_number string             `bson:"phone_number,omitempty" json:"phone_number,omitempty"`
 	Alamat       string             `bson:"alamat,omitempty" json:"alamat,omitempty"`
