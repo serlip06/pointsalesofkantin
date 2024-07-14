@@ -79,14 +79,14 @@ func GetAllPelanggan() (pelanggans [] model.Pelanggan) {
 	return pelanggans
 }
 
-func InsertProduk(namaProduk string, deskripsi string, harga int) interface{} {
-	var produk model.Produk
-	produk.ID = primitive.NewObjectID()
-	produk.Nama_Produk = namaProduk
-	produk.Deskripsi = deskripsi
-	produk.Harga = harga
-	return InsertOneDoc("kantin", "Menu_produk", produk)
-}
+// func InsertProduk(namaProduk string, deskripsi string, harga int) interface{} {
+// 	var produk model.Produk
+// 	produk.ID = primitive.NewObjectID()
+// 	produk.Nama_Produk = namaProduk
+// 	produk.Deskripsi = deskripsi
+// 	produk.Harga = harga
+// 	return InsertOneDoc("kantin", "Menu_produk", produk)
+// }
 
 func GetProdukByID(produkID primitive.ObjectID) (produk model.Produk) {
 	collection := MongoConnect("kantin").Collection("Menu_produk")
@@ -303,4 +303,28 @@ func DeleteCustomerByID(_id primitive.ObjectID, db *mongo.Database, col string) 
 	}
 
 	return nil
+}
+
+//insert barang\
+func InsertBarang(namaProduk string, deskripsi string, harga int, gambar string, stok int) interface{} {
+	var barang model.Barang
+	barang.ID_barang = primitive.NewObjectID()
+	barang.Nama_Produk = namaProduk
+	barang.Deskripsi = deskripsi
+	barang.Harga = harga
+	barang.Gambar = gambar
+	barang.Stok = stok
+	return InsertOneDoc("kantin", "barang", barang)
+}
+
+func InsertDataProduk(adminID string, nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
+    var produk model.Produk
+    produk.IDProduk = primitive.NewObjectID()
+    produk.AdminID = primitive.NewObjectID() // Assuming adminID is an ObjectID, change this if adminID is different
+    produk.Nama_Produk = nama_produk
+    produk.Deskripsi = deskripsi
+    produk.Harga = harga
+    produk.Gambar = gambar
+    produk.Stok = stok
+    return InsertOneDoc("kantin", "produk", produk)
 }
