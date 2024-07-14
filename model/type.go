@@ -38,3 +38,12 @@ type Customer struct {
 	Gambar       string             `bson:"gambar,omitempty" json:"gambar,omitempty"`
 	Stok         string             `bson:"stok,omitempty" json:"stok,omitempty"`
 }
+
+type Barang struct {
+	Nama_Produk  string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"`
+	Deskripsi    string             `bson:"deskripsi,omitempty" json:"deskripsi,omitempty"`
+	Harga        int                `bson:"harga,omitempty" json:"harga,omitempty"`
+	Gambar       string             `bson:"gambar,omitempty" json:"gambar,omitempty"`
+	Stok         string             `bson:"stok,omitempty" json:"stok,omitempty"`	
+}
+
