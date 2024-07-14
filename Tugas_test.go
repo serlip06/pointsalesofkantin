@@ -171,3 +171,18 @@ func TestDeleteCustomerByID(t *testing.T) {
 		t.Fatalf("expected data to be deleted, but it still exists")
 	}
 }
+func TestGetCustomerByID(t *testing.T) {
+	customerID, err := primitive.ObjectIDFromHex("6682995cb6ea919536290321")
+	if err != nil {
+		fmt.Printf("error converting id to ObjectID: %v\n", err)
+		return
+	}
+
+	// Asumsikan module.MongoConn telah diinisialisasi sebelumnya
+	customer, err := module.GetCustomerByID(customerID, module.MongoConn, "customer")
+	if err != nil {
+		fmt.Printf("error calling GetCustomerByID: %v\n", err)
+		return
+	}
+	fmt.Println(customer)
+}

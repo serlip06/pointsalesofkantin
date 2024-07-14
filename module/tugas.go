@@ -214,11 +214,10 @@ func InsertCustomer(nama string, phoneNumber string, alamat string, email []stri
 	customer.Stok = stok
 	return InsertOneDoc("kantin", "customer", customer)
 }
-
 func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (customer model.Customer, errs error) {
-	karyawan := db.Collection(col)
+	Customer := db.Collection(col)
 	filter := bson.M{"_id": _id}
-	err := karyawan.FindOne(context.TODO(), filter).Decode(&customer)
+	err := Customer.FindOne(context.TODO(), filter).Decode(&customer)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return customer, fmt.Errorf("no data found for ID %s", _id)
@@ -227,6 +226,17 @@ func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (
 	}
 	return customer, nil
 }
+
+func GetCustomerByID(customerID primitive.ObjectID, db *mongo.Database, collectionName string) (customer model.Customer, err error) {
+	collection := db.Collection(collectionName)
+	filter := bson.M{"_id": customerID}
+	err = collection.FindOne(context.TODO(), filter).Decode(&customer)
+	if err != nil {
+		fmt.Printf("GetCutomerByID: %v\n", err)
+	}
+	return customer, err
+}
+
 func GetAllCustomer() (customers [] model.Customer) {
 	collection := MongoConnect("kantin").Collection("customer")
 	cursor, err := collection.Find(context.TODO(), bson.D{})
@@ -269,11 +279,11 @@ func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama 
 	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		fmt.Printf("UpdateCustomer: %v\n", err)
-		return err
+		return 
 	}
 	if result.ModifiedCount == 0 {
 		err = errors.New("no data has been changed with the specified ID")
-		return err
+		return 
 	}
 	return nil
 }
