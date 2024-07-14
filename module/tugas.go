@@ -317,14 +317,14 @@ func InsertBarang(namaProduk string, deskripsi string, harga int, gambar string,
 	return InsertOneDoc("kantin", "barang", barang)
 }
 
-func InsertDataProduk(adminID string, nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
-    var produk model.Produk
-    produk.IDProduk = primitive.NewObjectID()
-    produk.AdminID = primitive.NewObjectID() // Assuming adminID is an ObjectID, change this if adminID is different
-    produk.Nama_Produk = nama_produk
-    produk.Deskripsi = deskripsi
-    produk.Harga = harga
-    produk.Gambar = gambar
-    produk.Stok = stok
-    return InsertOneDoc("kantin", "produk", produk)
-}
+// func InsertDataProduk(adminID string, nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
+//     var produk model.Produk
+//     produk.IDProduk = primitive.NewObjectID()
+//     produk.AdminID = primitive.NewObjectID() // Assuming adminID is an ObjectID, change this if adminID is different
+//     produk.Nama_Produk = nama_produk
+//     produk.Deskripsi = deskripsi
+//     produk.Harga = harga
+//     produk.Gambar = gambar
+//     produk.Stok = stok
+//     return InsertOneDoc("kantin", "produk", produk)
+// }
