@@ -14,7 +14,6 @@ type Pelanggan struct {
 
 type Produk struct {
 	IDProduk    primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	AdminID     primitive.ObjectID `bson:"admin_id" json:"admin_id"`
 	Nama_Produk string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"`
 	Deskripsi   string             `bson:"deskripsi,omitempty" json:"deskripsi,omitempty"`
 	Harga       int                `bson:"harga,omitempty" json:"harga,omitempty"`

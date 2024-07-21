@@ -28,10 +28,9 @@ func InsertData(dbname, collection string, doc interface{}) interface{} {
 	return insertResult.InsertedID
 }
 
-func InsertDataProduk(adminID string, nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
+func InsertDataProduk(nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
     var produk model.Produk
     produk.IDProduk = primitive.NewObjectID()
-    produk.AdminID = primitive.NewObjectID() // Assuming adminID is an ObjectID, change this if adminID is different
     produk.Nama_Produk = nama_produk
     produk.Deskripsi = deskripsi
     produk.Harga = harga

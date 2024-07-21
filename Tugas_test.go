@@ -7,7 +7,7 @@ import (
 	//"github.com/rogpeppe/go-internal/module"
 	"github.com/serlip06/pointsalesofkantin/module"
 
-	// "go.mongodb.org/mongo-driver/bson/primitive"
+	 "go.mongodb.org/mongo-driver/bson/primitive"
 	
 )
 
@@ -115,61 +115,61 @@ import (
 // 	}
 // }
 
-// //insert data customer 
-// func TestInsertCustomer(t *testing.T) {
-// 	nama := "Anindya Kirana"
-// 	phoneNumber := "0856-2245-5522"
-// 	alamat := "jl.sarijadi"
-// 	email := []string{"kirana90@gmail.com", "krn_anindya@gmail.com"}
-// 	namaProduk := "ayam geprek"
-// 	deskripsi := "Ayam goreng disajikan dengan sambal pedas dan kerupuk"
-// 	harga := 12000
-// 	gambar := "https://i.pinimg.com/564x/d3/47/b0/d347b0132dcb98af18158cbebd533cc8.jpg"
-// 	stok := "15"
+//insert data customer 
+func TestInsertCustomer(t *testing.T) {
+	nama := "Anindya Kirana"
+	phoneNumber := "0856-2245-5522"
+	alamat := "jl.sarijadi"
+	email := []string{"kirana90@gmail.com", "krn_anindya@gmail.com"}
+	namaProduk := "ayam geprek"
+	deskripsi := "Ayam goreng disajikan dengan sambal pedas dan kerupuk"
+	harga := 12000
+	gambar := "https://i.pinimg.com/564x/d3/47/b0/d347b0132dcb98af18158cbebd533cc8.jpg"
+	stok := "15"
 
-// 	insertedID := module.InsertCustomer(nama, phoneNumber, alamat, email, namaProduk, deskripsi, harga, gambar, stok)
-// 	fmt.Println(insertedID)
-// }
+	insertedID := module.InsertCustomer(nama, phoneNumber, alamat, email, namaProduk, deskripsi, harga, gambar, stok)
+	fmt.Println(insertedID)
+}
 
-// // get data customer by id
-// func TestCustomerFromID(t *testing.T) {
-// 	id := "6682995cb6ea919536290321" 
-// 	objectID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		t.Fatalf("error converting id to ObjectID: %v", err)
-// 	}
-// 	profil, err := module.GetCustomerFromID(objectID, module.MongoConn, "customer")
-// 	if err != nil {
-// 		t.Fatalf("error calling GetCustomerFromID: %v", err)
-// 	}
-// 	fmt.Println(profil)
-// }
+// get data customer by id
+func TestCustomerFromID(t *testing.T) {
+	id := "6682995cb6ea919536290321" 
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Fatalf("error converting id to ObjectID: %v", err)
+	}
+	profil, err := module.GetCustomerFromID(objectID, module.MongoConn, "customer")
+	if err != nil {
+		t.Fatalf("error calling GetCustomerFromID: %v", err)
+	}
+	fmt.Println(profil)
+}
 
-// // function get all customer
-// func TestGetAllCustomer(t *testing.T) {
-// 	customers := module.GetAllCustomer()
-// 	fmt.Println(customers)
-// }
+// function get all customer
+func TestGetAllCustomer(t *testing.T) {
+	customers := module.GetAllCustomer()
+	fmt.Println(customers)
+}
 
-// //function delete customer
-// func TestDeleteCustomerByID(t *testing.T) {
-// 	id := "6682ac8719e5c29e437eac67" // ID data yang ingin dihapus id anindya kirana
-// 	objectID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		t.Fatalf("error converting id to ObjectID: %v", err)
-// 	}
+//function delete customer
+func TestDeleteCustomerByID(t *testing.T) {
+	id := "6682ac8719e5c29e437eac67" // ID data yang ingin dihapus id anindya kirana
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Fatalf("error converting id to ObjectID: %v", err)
+	}
 
-// 	err = module.DeleteCustomerByID(objectID, module.MongoConn, "customer")
-// 	if err != nil {
-// 		t.Fatalf("error calling DeleteCustomerByID: %v", err)
-// 	}
+	err = module.DeleteCustomerByID(objectID, module.MongoConn, "customer")
+	if err != nil {
+		t.Fatalf("error calling DeleteCustomerByID: %v", err)
+	}
 
-// 	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan GetPelangganByID
-// 	_, err = module.GetCustomerFromID(objectID, module.MongoConn, "customer")
-// 	if err == nil {
-// 		t.Fatalf("expected data to be deleted, but it still exists")
-// 	}
-// }
+	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan GetPelangganByID
+	_, err = module.GetCustomerFromID(objectID, module.MongoConn, "customer")
+	if err == nil {
+		t.Fatalf("expected data to be deleted, but it still exists")
+	}
+}
 // func TestGetCustomerByID(t *testing.T) {
 // 	customerID, err := primitive.ObjectIDFromHex("6682995cb6ea919536290321")
 // 	if err != nil {
@@ -216,12 +216,11 @@ import (
 // }
 
 func TestInsertDataProduk(t *testing.T) {
-	admin_id := "615af14"
-	nama_produk := "lumpiah basah"
-	deskripsi := "ayam bakar dengan berbagai bumbu"
-	harga := 16000
-	gambar := "lumpiah.jpg"
-	stok := 10
-	insertedID := module.InsertDataProduk(admin_id, nama_produk, deskripsi, harga, gambar, stok)
+	nama_produk := "Mie Rebus"
+	deskripsi := "Mie dengan telur"
+	gambar := "https://i.pinimg.com/564x/d1/7d/a6/d17da654175f09aff329764e50105c82.jpg"
+	harga := 10000
+	stok := 30
+	insertedID := module.InsertDataProduk(nama_produk, deskripsi, harga, gambar, stok)
 	fmt.Println(insertedID)
 }
