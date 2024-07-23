@@ -200,7 +200,7 @@ func DeletePelangganByID(_id primitive.ObjectID, db *mongo.Database, col string)
 }
 
 //function untuk bagian customer 
-func InsertCustomer(nama string, phoneNumber string, alamat string, email []string, namaProduk string, deskripsi string, harga int, gambar string, stok string) interface{} {
+func InsertCustomer(nama string, phoneNumber string, alamat string, email string, namaProduk string, deskripsi string, harga int, gambar string, stok string) interface{} {
 	var customer model.Customer
 	customer.ID = primitive.NewObjectID()
 	customer.Nama = nama

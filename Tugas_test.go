@@ -120,7 +120,7 @@ func TestInsertCustomer(t *testing.T) {
 	nama := "Anindya Kirana"
 	phoneNumber := "0856-2245-5522"
 	alamat := "jl.sarijadi"
-	email := []string{"kirana90@gmail.com", "krn_anindya@gmail.com"}
+	email := "kirana90@gmail.com"
 	namaProduk := "ayam geprek"
 	deskripsi := "Ayam goreng disajikan dengan sambal pedas dan kerupuk"
 	harga := 12000
