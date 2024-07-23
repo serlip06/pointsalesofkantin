@@ -261,7 +261,7 @@ func GetAllCustomer() (customers [] model.Customer) {
 
 // function update dan delete untuk data customer 
 //function update 
-func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama string, phoneNumber string, alamat string, email []string, namaProduk string, deskripsi string, harga int, gambar string, stok string) (err error) {
+func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama string, phoneNumber string, alamat string, email string, namaProduk string, deskripsi string, harga int, gambar string, stok string) (err error) {
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
