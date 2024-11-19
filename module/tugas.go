@@ -200,18 +200,13 @@ func DeletePelangganByID(_id primitive.ObjectID, db *mongo.Database, col string)
 }
 
 //function untuk bagian customer 
-func InsertCustomer(nama string, phoneNumber string, alamat string, email []string, namaProduk string, deskripsi string, harga int, gambar string, stok string) interface{} {
+func InsertCustomer(nama string, phoneNumber string, alamat string, email []string) interface{} {
 	var customer model.Customer
 	customer.ID = primitive.NewObjectID()
 	customer.Nama = nama
 	customer.Phone_number = phoneNumber
 	customer.Alamat = alamat
 	customer.Email = email
-	customer.Nama_Produk = namaProduk
-	customer.Deskripsi = deskripsi
-	customer.Harga = harga
-	customer.Gambar = gambar
-	customer.Stok = stok
 	return InsertOneDoc("kantin", "customer", customer)
 }
 func GetCustomerFromID(_id primitive.ObjectID, db *mongo.Database, col string) (customer model.Customer, errs error) {
@@ -254,14 +249,14 @@ func GetAllCustomer() (customers [] model.Customer) {
 		customers = append(customers, customer )
 	}
 	if err := cursor.Err(); err != nil {
-		fmt.Printf("GetAllPelanggan: %v\n", err)
+		fmt.Printf("GetAllCustomer: %v\n", err)
 	}
 	return customers
 }
 
 // function update dan delete untuk data customer 
 //function update 
-func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama string, phoneNumber string, alamat string, email []string, namaProduk string, deskripsi string, harga int, gambar string, stok string) (err error) {
+func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama string, phoneNumber string, alamat string, email []string) (err error) {
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
@@ -269,11 +264,6 @@ func UpdateCustomer(db *mongo.Database, col string, id primitive.ObjectID, nama 
 			"phone_number":  phoneNumber,
 			"alamat":        alamat,
 			"email":         email,
-			"nama_produk":   namaProduk,
-			"deskripsi":     deskripsi,
-			"harga":         harga,
-			"gambar":        gambar,
-			"stok":          stok,
 		},
 	}
 	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)

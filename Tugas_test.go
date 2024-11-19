@@ -117,23 +117,18 @@ import (
 
 //insert data customer 
 func TestInsertCustomer(t *testing.T) {
-	nama := "Anindya Kirana"
+	nama := "Tom Holland"
 	phoneNumber := "0856-2245-5522"
-	alamat := "jl.sarijadi"
-	email := []string{"kirana90@gmail.com","kirana88@gmail.com"}
-	namaProduk := "ayam geprek"
-	deskripsi := "Ayam goreng disajikan dengan sambal pedas dan kerupuk"
-	harga := 12000
-	gambar := "https://i.pinimg.com/564x/d3/47/b0/d347b0132dcb98af18158cbebd533cc8.jpg"
-	stok := "15"
-
-	insertedID := module.InsertCustomer(nama, phoneNumber, alamat, email, namaProduk, deskripsi, harga, gambar, stok)
+	alamat := "jl.dago pakar"
+	email := []string{"tomhllnd@gmail.com","holandtom22@gmail.com"}
+	
+	insertedID := module.InsertCustomer(nama, phoneNumber, alamat, email)
 	fmt.Println(insertedID)
 }
 
 // get data customer by id
 func TestCustomerFromID(t *testing.T) {
-	id := "6682995cb6ea919536290321" 
+	id := "673c9e05adbfb49a59ab07c1" 
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Fatalf("error converting id to ObjectID: %v", err)
@@ -216,11 +211,11 @@ func TestDeleteCustomerByID(t *testing.T) {
 // }
 
 func TestInsertDataProduk(t *testing.T) {
-	nama_produk := "Mie Goreng"
-	deskripsi := "Mie dengan telur"
-	gambar := "https://i.pinimg.com/564x/d1/7d/a6/d17da654175f09aff329764e50105c82.jpg"
-	harga := 10000
-	stok := 30
+	nama_produk := "Ikan bakar "
+	deskripsi := "Ikan bakar yang enak "
+	gambar := "https://i.pinimg.com/736x/a9/c1/86/a9c186a2a4c0202f2bef835b3fbf5327.jpg"
+	harga := 25000
+	stok := 15
 	insertedID := module.InsertDataProduk(nama_produk, deskripsi, harga, gambar, stok)
 	fmt.Println(insertedID)
 }
