@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func MongoConnectDb(dbname string) (db *mongo.Database)  {
+func MongoConnectDb(dbname string) (db *mongo.Database) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(MongoString))
 	if err != nil {
 		fmt.Printf("MongoConnect: %v\n", err)
@@ -29,18 +29,32 @@ func InsertData(dbname, collection string, doc interface{}) interface{} {
 	}
 	return insertResult.InsertedID
 }
-//inserr data 
-func InsertDataProduk(nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
-    var produk model.Produk
-    produk.IDProduk = primitive.NewObjectID()
-    produk.Nama_Produk = nama_produk
-    produk.Deskripsi = deskripsi
-    produk.Harga = harga
-    produk.Gambar = gambar
-    produk.Stok = stok
-    return InsertData("kantin", "produk", produk)
+
+// insert data
+func InsertDataProduk(nama_produk string, deskripsi string, harga int, gambar string, stok int, kategori string) (interface{}, error) {
+	// Validasi kategori
+	if kategori != "Makanan" && kategori != "Minuman" {
+		return nil, errors.New("kategori harus berupa 'Makanan' atau 'Minuman'")
+	}
+
+	var produk model.Produk
+	produk.IDProduk = primitive.NewObjectID()
+	produk.Nama_Produk = nama_produk
+	produk.Deskripsi = deskripsi
+	produk.Harga = harga
+	produk.Gambar = gambar
+	produk.Stok = stok
+	produk.Kategori = kategori // Tambahkan kategori
+
+	result := InsertData("kantin", "produk", produk)
+	if result == nil {
+		return nil, errors.New("gagal menyimpan produk")
+	}
+
+	return result, nil
 }
-//memanggil data by id
+
+// memanggil data by id
 func GetProduksFromID(_id primitive.ObjectID, db *mongo.Database, col string) (produk model.Produk, errs error) {
 	Produk := db.Collection(col)
 	filter := bson.M{"_id": _id}
@@ -53,30 +67,46 @@ func GetProduksFromID(_id primitive.ObjectID, db *mongo.Database, col string) (p
 	}
 	return produk, nil
 }
-//memanggil semua data produk
-func GetAllProduks() (produks [] model.Produk) {
+
+// memanggil semua data produk
+func GetAllProduks(kategori string) (produks []model.Produk, err error) {
 	collection := MongoConnect("kantin").Collection("produk")
-	cursor, err := collection.Find(context.TODO(), bson.D{})
+
+	// Filter berdasarkan kategori jika diberikan
+	var filter bson.M
+	if kategori != "" {
+		filter = bson.M{"kategori": kategori}
+	} else {
+		filter = bson.M{}
+	}
+
+	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("GetAllProduks: %v\n", err)
-		return nil
+		return nil, fmt.Errorf("GetAllProduks: %v", err)
 	}
 	defer cursor.Close(context.TODO())
+
 	for cursor.Next(context.Background()) {
 		var produk model.Produk
 		if err := cursor.Decode(&produk); err != nil {
 			fmt.Printf("GetAllProduks: %v\n", err)
 			continue
 		}
-		produks = append(produks, produk )
+		produks = append(produks, produk)
 	}
 	if err := cursor.Err(); err != nil {
-		fmt.Printf("GetAllProduks: %v\n", err)
+		return nil, fmt.Errorf("GetAllProduks: %v", err)
 	}
-	return produks
+	return produks, nil
 }
-//update data produk 
-func UpdateProduks(db *mongo.Database, col string, id primitive.ObjectID, Nama_Produk string, Deskripsi string, Harga int, Gambar string, Stok int) (err error) {
+
+// update data produk
+func UpdateProduks(db *mongo.Database, col string, id primitive.ObjectID, Nama_Produk string, Deskripsi string, Harga int, Gambar string, Stok int, Kategori string) (err error) {
+	// Validasi kategori
+	if Kategori != "Makanan" && Kategori != "Minuman" {
+		return errors.New("kategori harus berupa 'Makanan' atau 'Minuman'")
+	}
+
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
@@ -85,20 +115,21 @@ func UpdateProduks(db *mongo.Database, col string, id primitive.ObjectID, Nama_P
 			"harga":       Harga,
 			"gambar":      Gambar,
 			"stok":        Stok,
+			"kategori":    Kategori, // Tambahkan kategori
 		},
 	}
 	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		fmt.Printf("UpdateProduks: %v\n", err)
-		return 
+		return
 	}
 	if result.ModifiedCount == 0 {
-		err = errors.New("no data has been changed with the specified ID")
-		return 
+		return errors.New("no data has been changed with the specified ID")
 	}
 	return nil
 }
-//delete data produk
+
+// delete data produk
 func DeleteProduksByID(_id primitive.ObjectID, db *mongo.Database, col string) error {
 	Produk := db.Collection(col)
 	filter := bson.M{"_id": _id}

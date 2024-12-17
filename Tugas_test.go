@@ -7,8 +7,7 @@ import (
 	//"github.com/rogpeppe/go-internal/module"
 	"github.com/serlip06/pointsalesofkantin/module"
 
-	 "go.mongodb.org/mongo-driver/bson/primitive"
-	
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // func TestInsertPelanggan(t *testing.T) {
@@ -44,7 +43,6 @@ import (
 // 	}
 // 	fmt.Println(pelanggan)
 // }
-
 
 // func TestGetAllPelanggan(t *testing.T) {
 // 	pelanggans := module.GetAllPelanggan()
@@ -115,20 +113,20 @@ import (
 // 	}
 // }
 
-//insert data customer 
+// insert data customer
 func TestInsertCustomer(t *testing.T) {
 	nama := "Tom Holland"
 	phoneNumber := "0856-2245-5522"
 	alamat := "jl.dago pakar"
-	email := []string{"tomhllnd@gmail.com","holandtom22@gmail.com"}
-	
+	email := []string{"tomhllnd@gmail.com", "holandtom22@gmail.com"}
+
 	insertedID := module.InsertCustomer(nama, phoneNumber, alamat, email)
 	fmt.Println(insertedID)
 }
 
 // get data customer by id
 func TestCustomerFromID(t *testing.T) {
-	id := "673c9e05adbfb49a59ab07c1" 
+	id := "673c9e05adbfb49a59ab07c1"
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Fatalf("error converting id to ObjectID: %v", err)
@@ -146,7 +144,7 @@ func TestGetAllCustomer(t *testing.T) {
 	fmt.Println(customers)
 }
 
-//function delete customer
+// function delete customer
 func TestDeleteCustomerByID(t *testing.T) {
 	id := "6682ac8719e5c29e437eac67" // ID data yang ingin dihapus id anindya kirana
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -165,6 +163,7 @@ func TestDeleteCustomerByID(t *testing.T) {
 		t.Fatalf("expected data to be deleted, but it still exists")
 	}
 }
+
 // func TestGetCustomerByID(t *testing.T) {
 // 	customerID, err := primitive.ObjectIDFromHex("6682995cb6ea919536290321")
 // 	if err != nil {
@@ -182,8 +181,6 @@ func TestDeleteCustomerByID(t *testing.T) {
 // }
 
 // //insertbarang
-
-
 
 // // Mock InsertOneDoc function for testing purposes
 // func InsertOneDoc(db string, collection string, doc interface{}) interface{} {
@@ -205,22 +202,26 @@ func TestDeleteCustomerByID(t *testing.T) {
 // 	gambar := "https://i.pinimg.com/564x/d3/47/b0/d347b0132dcb98af18158cbebd533cc8.jpg"
 // 	stok := 15
 
-
-
 // 	fmt.Println(barang.ID_barang)
 // }
 
+// test untuk produknya
 func TestInsertDataProduk(t *testing.T) {
-	nama_produk := "Ikan bakar "
-	deskripsi := "Ikan bakar yang enak "
-	gambar := "https://i.pinimg.com/736x/a9/c1/86/a9c186a2a4c0202f2bef835b3fbf5327.jpg"
-	harga := 25000
-	stok := 15
-	insertedID := module.InsertDataProduk(nama_produk, deskripsi, harga, gambar, stok)
-	fmt.Println(insertedID)
+	nama_produk := "Pangsit pedas"
+	deskripsi := "Pangsit pedas yang enak"
+	gambar := "https://i.pinimg.com/736x/b2/db/a4/b2dba44f2dd0ad242e0575fd17ad94c7.jpg"
+	harga := 10000
+	stok := 10
+	kategori := "Makanan"
+
+	insertedID, err := module.InsertDataProduk(nama_produk, deskripsi, harga, gambar, stok, kategori)
+	if err != nil {
+		t.Fatalf("error inserting data produk: %v", err)
+	}
+	fmt.Printf("Inserted ID: %v\n", insertedID)
 }
 
-//test buat delete data produknya 
+// test buat delete data produknya
 func TestDeleteProduksByID(t *testing.T) {
 	id := "6693f0a667dbd67851b4f04c" // ID data yang ingin dihapus id ayam bakar
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -233,20 +234,26 @@ func TestDeleteProduksByID(t *testing.T) {
 		t.Fatalf("error calling DeleteCustomerByID: %v", err)
 	}
 
-	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan Getprodukfrom id 
+	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan Getprodukfrom id
 	_, err = module.GetProduksFromID(objectID, module.MongoConn, "produk")
 	if err == nil {
 		t.Fatalf("expected data to be deleted, but it still exists")
 	}
 }
-//function get all produks
-func  TestGetAllProduks(t *testing.T) {
-	produks := module.GetAllProduks()
-	fmt.Println(produks)
+
+// function get all produks
+func TestGetAllProduks(t *testing.T) {
+	kategori := "Makanan" // Ubah sesuai kebutuhan: "Makanan" atau "Minuman"
+	produks, err := module.GetAllProduks(kategori)
+	if err != nil {
+		t.Fatalf("error calling GetAllProduks: %v", err)
+	}
+	fmt.Println("Produk yang ditemukan:", produks)
 }
-//get produk by id 
+
+// get produk by id
 func TestProduksFromID(t *testing.T) {
-	id := "669cbbf56733fd391c96bb86" // idnya mie pedas
+	id := "674b290af85cc65485585875" // idnya bolu 
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Fatalf("error converting id to ObjectID: %v", err)

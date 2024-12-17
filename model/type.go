@@ -19,6 +19,7 @@ type Produk struct {
 	Harga       int                `bson:"harga,omitempty" json:"harga,omitempty"`
 	Gambar      string             `bson:"gambar,omitempty" json:"gambar,omitempty"`
 	Stok        int                `bson:"stok,omitempty" json:"stok,omitempty"`
+	Kategori    string             `bson:"kategori,omitempty" json:"kategori,omitempty"`
 }
 
 type Transaksi struct {
