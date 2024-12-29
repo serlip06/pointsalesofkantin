@@ -44,3 +44,22 @@ type Barang struct {
 	Gambar      string             `bson:"gambar,omitempty" json:"gambar,omitempty"`
 	Stok        int                `bson:"stok,omitempty" json:"stok,omitempty"`
 }
+
+// struct untuk item dalam keranjang
+type CartItem struct {
+	IDCartItem primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`               // ID unik untuk item keranjang
+	IDProduk   primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"`   // Referensi ke ID Produk
+	NamaProduk string             `bson:"NamaProduk,omitempty" json:"NamaProduk,omitempty"` //nama untuk produknya
+	Harga      int                `bson:"harga,omitempty" json:"harga,omitempty"`           // Harga produk pada saat dimasukkan ke keranjang
+	Quantity   int                `bson:"quantity,omitempty" json:"quantity,omitempty"`     // Jumlah produk dalam keranjang
+	SubTotal   int                `bson:"sub_total,omitempty" json:"sub_total,omitempty"`   // Total harga (Harga * Quantity)
+}
+
+type Pesanan struct {
+	IDPesanan    primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	ID           primitive.ObjectID `bson:"id_customer,omitempty" json:"id,omitempty"` // idnya yang ada di customer
+	Produk       []Produk           `bson:"produk,omitempty" json:"produk,omitempty"`
+	TotalHarga   int                `bson:"total_harga,omitempty" json:"total_harga,omitempty"`
+	Status       string             `bson:"status,omitempty" json:"status,omitempty"` // Contoh: "Menunggu Konfirmasi", "Dikonfirmasi", "Selesai"
+	TanggalPesan string             `bson:"tanggal_pesan,omitempty" json:"tanggal_pesan,omitempty"`
+}

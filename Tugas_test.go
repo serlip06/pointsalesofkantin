@@ -4,114 +4,15 @@ import (
 	"fmt"
 	"testing"
 
+	"context"
 	//"github.com/rogpeppe/go-internal/module"
 	"github.com/serlip06/pointsalesofkantin/module"
+	"github.com/serlip06/pointsalesofkantin/model"
 
+	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
-
-// func TestInsertPelanggan(t *testing.T) {
-// 	nama := "askara dirgantara"
-// 	phoneNumber := "0812-9098-8680"
-// 	alamat := " perumahan dirgantara "
-// 	email := []string{"akssa_88@gmail.com", "aska__89@gmail.com"}
-// 	insertedID := module.InsertPelanggan(nama, phoneNumber, alamat, email)
-// 	fmt.Println(insertedID)
-// }
-
-// // func TestGetPelangganByID(t *testing.T) {
-// // 	pelangganID, err := primitive.ObjectIDFromHex("615af14ae62f4c488e1d6d14")
-// // 	if err != nil {
-// // 		fmt.Printf("Error: %v\n", err)
-// // 		return
-// // 	}
-// // 	pelanggan := module.GetPelangganByID(pelangganID)
-// // 	fmt.Println(pelanggan)
-// // }
-// func TestGetPelangganByID(t *testing.T) {
-// 	pelangganID, err := primitive.ObjectIDFromHex("615af14ae62f4c488e1d6d14")
-// 	if err != nil {
-// 		fmt.Printf("error converting id to ObjectID: %v\n", err)
-// 		return
-// 	}
-
-// 	// Asumsikan module.MongoConn telah diinisialisasi sebelumnya
-// 	pelanggan, err := module.GetPelangganByID(pelangganID, module.MongoConn, "kantin_pelanggan")
-// 	if err != nil {
-// 		fmt.Printf("error calling GetPelangganByID: %v\n", err)
-// 		return
-// 	}
-// 	fmt.Println(pelanggan)
-// }
-
-// func TestGetAllPelanggan(t *testing.T) {
-// 	pelanggans := module.GetAllPelanggan()
-// 	fmt.Println(pelanggans)
-// }
-
-// func TestInsertProduk(t *testing.T) {
-// 	namaProduk := "lumpiah basah"
-// 	deskripsi := "ayam bakar dengan berbagai bumbu  "
-// 	harga := 16000
-// 	insertedID := module.InsertProduk(namaProduk, deskripsi, harga)
-// 	fmt.Println(insertedID)
-// }
-
-// func TestGetProdukByID(t *testing.T) {
-// 	produkID, err := primitive.ObjectIDFromHex("615af14ae62f4c488e1d6d14")
-// 	if err != nil {
-// 		fmt.Printf("Error: %v\n", err)
-// 		return
-// 	}
-// 	produk := module.GetProdukByID(produkID)
-// 	fmt.Println(produk)
-// }
-
-// func TestGetAllProduk(t *testing.T) {
-// 	produks := module.GetAllProduk()
-// 	fmt.Println(produks)
-// }
-
-// func TestInsertTransaksi(t *testing.T) {
-// 	metodePembayaran := "bayar langsung"
-// 	tanggalWaktu := "2021-11-23 22:00:00"
-// 	insertedID := module.InsertTransaksi(metodePembayaran, tanggalWaktu)
-// 	fmt.Println(insertedID)
-// }
-
-// func TestGetTransaksiByID(t *testing.T) {
-// 	transaksiID, err := primitive.ObjectIDFromHex("615af14ae62f4c488e1d6d14")
-// 	if err != nil {
-// 		fmt.Printf("Error: %v\n", err)
-// 		return
-// 	}
-// 	transaksi := module.GetTransaksiByID(transaksiID)
-// 	fmt.Println(transaksi)
-// }
-// func TestGetAllTransaksi(t *testing.T) {
-// 	transaksis := module.GetAllTransaksi()
-// 	fmt.Println(transaksis)
-// }
-
-// //testing delete pelanggan
-// func TestDeletePelangganByID(t *testing.T) {
-// 	id := "663c6729918275d152c9d488" // ID data yang ingin dihapus id elisabet
-// 	objectID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		t.Fatalf("error converting id to ObjectID: %v", err)
-// 	}
-
-// 	err = module.DeletePelangganByID(objectID, module.MongoConn, "kantin_pelanggan")
-// 	if err != nil {
-// 		t.Fatalf("error calling DeletePelangganByID: %v", err)
-// 	}
-
-// 	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan GetPelangganByID
-// 	_, err = module.GetPelangganByID(objectID, module.MongoConn, "kantin_pelanggan")
-// 	if err == nil {
-// 		t.Fatalf("expected data to be deleted, but it still exists")
-// 	}
-// }
 
 // insert data customer
 func TestInsertCustomer(t *testing.T) {
@@ -163,47 +64,6 @@ func TestDeleteCustomerByID(t *testing.T) {
 		t.Fatalf("expected data to be deleted, but it still exists")
 	}
 }
-
-// func TestGetCustomerByID(t *testing.T) {
-// 	customerID, err := primitive.ObjectIDFromHex("6682995cb6ea919536290321")
-// 	if err != nil {
-// 		fmt.Printf("error converting id to ObjectID: %v\n", err)
-// 		return
-// 	}
-
-// 	// Asumsikan module.MongoConn telah diinisialisasi sebelumnya
-// 	customer, err := module.GetCustomerByID(customerID, module.MongoConn, "customer")
-// 	if err != nil {
-// 		fmt.Printf("error calling GetCustomerByID: %v\n", err)
-// 		return
-// 	}
-// 	fmt.Println(customer)
-// }
-
-// //insertbarang
-
-// // Mock InsertOneDoc function for testing purposes
-// func InsertOneDoc(db string, collection string, doc interface{}) interface{} {
-// 	// Mocked implementation, you can add logic to validate input or return a mock result
-// 	return doc
-// }
-
-// func InsertBarang(namaProduk string, deskripsi string, harga int, gambar string, stok int) interface{} {
-// 	// Implementation of InsertBarang function
-// 	// You can add your logic here
-// 	return nil
-// }
-
-// func TestInsertBarang(t *testing.T) {
-// 	// Data untuk pengujian
-// 	namaProduk := "ayam geprek"
-// 	deskripsi := "Ayam goreng disajikan dengan sambal pedas dan kerupuk"
-// 	harga := 12000
-// 	gambar := "https://i.pinimg.com/564x/d3/47/b0/d347b0132dcb98af18158cbebd533cc8.jpg"
-// 	stok := 15
-
-// 	fmt.Println(barang.ID_barang)
-// }
 
 // test untuk produknya
 func TestInsertDataProduk(t *testing.T) {
@@ -264,3 +124,81 @@ func TestProduksFromID(t *testing.T) {
 	}
 	fmt.Println(profil)
 }
+
+//test untuk masuk keranjang
+//insert to cartitme (keranjang)
+func TestInsertDataCartItemFunc(t *testing.T) {
+    db, err := module.MongoConnectdatabase("kantin") // Nama database yang benar
+    assert.NoError(t, err)
+
+    // Gunakan ID produk yang valid dan sesuaikan dengan format ObjectID
+    idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // id produk : ikan bakar
+    if err != nil {
+        t.Fatalf("Invalid ObjectID: %v", err)
+    }
+
+    // Pastikan ID tersebut ada di database
+    collection := db.Collection("produk")
+    var product model.Produk
+    err = collection.FindOne(context.TODO(), bson.M{"_id": idProduk}).Decode(&product)
+    if err != nil {
+        t.Fatalf("Product with ID %v not found: %v", idProduk, err)
+    }
+
+    // Lanjutkan dengan pengujian InsertDataCartItemFunc
+    quantity := 2
+    result, err := module.InsertDataCartItemFunc(db, idProduk, quantity)
+
+    // Verifikasi hasil
+    assert.NoError(t, err)
+    assert.NotNil(t, result)
+}
+
+// //get cartitemfromid
+func TestGetCartItemFromID(t *testing.T) {
+    // Setup database dan koleksi
+    db, err := module.MongoConnectdatabase("kantin")
+    assert.NoError(t, err)
+
+    // ID cart item yang valid, misalnya ID yang sudah ada di database
+    id, err := primitive.ObjectIDFromHex("676fb8a26214462f56e4965d") // Ganti dengan ID yang valid
+    assert.NoError(t, err) // Tambahkan ini untuk menangani error
+
+    // Panggil fungsi GetCartItemFromID
+    cartItem, err := module.GetCartItemFromID(id, db, "cart_items")
+
+    // Verifikasi hasil
+    assert.NoError(t, err)
+    assert.NotNil(t, cartItem)
+    assert.Equal(t, id, cartItem.IDCartItem) // Sesuaikan atribut dengan nama di struct Anda
+    // assert.Equal(t, "NamaProduk yang diharapkan", cartItem.NamaProduk) // Tambahkan verifikasi field lain jika perlu
+}
+
+// //get all cartitem
+func TestGetAllCartItems(t *testing.T) {
+	cartitems := module.GetAllCartItems()
+	// Menggunakan %v untuk mencetak slice dengan format default
+	fmt.Printf("%v\n", cartitems)
+}
+
+// deletecartitem
+func TestDeleteCartItemFromID(t *testing.T) {
+	id := "6770f80a419da98516ba7db1" //id yang akan dihapus ini pake id yang ikan bakar
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Fatalf("error converting id to ObjectID: %v", err)
+	}
+	err = module.DeleteCartItemByID(objectID, module.MongoConn, "cart_items")
+	if err != nil {
+		t.Fatalf("error calling DeleteCartItemFromID: %v", err)
+	}
+
+	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan Getprodukfrom id
+	_, err = module.GetCartItemFromID(objectID, module.MongoConn, "cart_items")
+	if err == nil {
+		t.Fatalf("expected data to be deleted, but it still exists")
+	}
+}
+
+// test untuk pesanan 
+
