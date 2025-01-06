@@ -36,48 +36,48 @@ func InsertOneDoc(dbname, collection string, doc interface{}) interface{} {
 	return insertResult.InsertedID
 }
 
-func InsertPelanggan(nama string, phoneNumber string, alamat string, email []string) interface{} {
-	var pelanggan  model.Pelanggan
-	pelanggan.ID = primitive.NewObjectID()
-	pelanggan.Nama = nama
-	pelanggan.Phone_number = phoneNumber
-	pelanggan.Alamat = alamat
-	pelanggan.Email = email
-	return InsertOneDoc("kantin", "kantin_pelanggan", pelanggan)
-}
+// func InsertPelanggan(nama string, phoneNumber string, alamat string, email []string) interface{} {
+// 	var pelanggan  model.Pelanggan
+// 	pelanggan.ID = primitive.NewObjectID()
+// 	pelanggan.Nama = nama
+// 	pelanggan.Phone_number = phoneNumber
+// 	pelanggan.Alamat = alamat
+// 	pelanggan.Email = email
+// 	return InsertOneDoc("kantin", "kantin_pelanggan", pelanggan)
+// }
 
-func GetPelangganByID(pelangganID primitive.ObjectID, db *mongo.Database, collectionName string) (pelanggan model.Pelanggan, err error) {
-	collection := db.Collection(collectionName)
-	filter := bson.M{"_id": pelangganID}
-	err = collection.FindOne(context.TODO(), filter).Decode(&pelanggan)
-	if err != nil {
-		fmt.Printf("GetPelangganByID: %v\n", err)
-	}
-	return pelanggan, err
-}
+// func GetPelangganByID(pelangganID primitive.ObjectID, db *mongo.Database, collectionName string) (pelanggan model.Pelanggan, err error) {
+// 	collection := db.Collection(collectionName)
+// 	filter := bson.M{"_id": pelangganID}
+// 	err = collection.FindOne(context.TODO(), filter).Decode(&pelanggan)
+// 	if err != nil {
+// 		fmt.Printf("GetPelangganByID: %v\n", err)
+// 	}
+// 	return pelanggan, err
+// }
 
 
-func GetAllPelanggan() (pelanggans [] model.Pelanggan) {
-	collection := MongoConnect("kantin").Collection("kantin_pelanggan")
-	cursor, err := collection.Find(context.TODO(), bson.D{})
-	if err != nil {
-		fmt.Printf("GetAllPelanggan: %v\n", err)
-		return nil
-	}
-	defer cursor.Close(context.TODO())
-	for cursor.Next(context.Background()) {
-		var pelanggan model.Pelanggan
-		if err := cursor.Decode(&pelanggan); err != nil {
-			fmt.Printf("GetAllPelanggan: %v\n", err)
-			continue
-		}
-		pelanggans = append(pelanggans, pelanggan)
-	}
-	if err := cursor.Err(); err != nil {
-		fmt.Printf("GetAllPelanggan: %v\n", err)
-	}
-	return pelanggans
-}
+// func GetAllPelanggan() (pelanggans [] model.Pelanggan) {
+// 	collection := MongoConnect("kantin").Collection("kantin_pelanggan")
+// 	cursor, err := collection.Find(context.TODO(), bson.D{})
+// 	if err != nil {
+// 		fmt.Printf("GetAllPelanggan: %v\n", err)
+// 		return nil
+// 	}
+// 	defer cursor.Close(context.TODO())
+// 	for cursor.Next(context.Background()) {
+// 		var pelanggan model.Pelanggan
+// 		if err := cursor.Decode(&pelanggan); err != nil {
+// 			fmt.Printf("GetAllPelanggan: %v\n", err)
+// 			continue
+// 		}
+// 		pelanggans = append(pelanggans, pelanggan)
+// 	}
+// 	if err := cursor.Err(); err != nil {
+// 		fmt.Printf("GetAllPelanggan: %v\n", err)
+// 	}
+// 	return pelanggans
+// }
 
 // func InsertProduk(namaProduk string, deskripsi string, harga int) interface{} {
 // 	var produk model.Produk
@@ -161,43 +161,44 @@ func GetAllTransaksi() (transaksis [] model.Transaksi) {
 }
 
 // update function
-func UpdatePelanggan(db *mongo.Database, col string, id primitive.ObjectID, nama string, phonenumber string, alamat string, email []string) (err error) {
-	filter := bson.M{"_id": id}
-	update := bson.M{
-		"$set": bson.M{
-			"nama":         nama,
-			"phone_number": phonenumber,
-			"alamat":       alamat,
-			"email":        email,
-		},
-	}
-	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		fmt.Printf("UpdatePelanggan: %v\n", err)
-		return
-	}
-	if result.ModifiedCount == 0 {
-		err = errors.New("no data has been changed with the specified ID")
-		return
-	}
-	return nil
-}
+// func UpdatePelanggan(db *mongo.Database, col string, id primitive.ObjectID, nama string, phonenumber string, alamat string, email []string) (err error) {
+// 	filter := bson.M{"_id": id}
+// 	update := bson.M{
+// 		"$set": bson.M{
+// 			"nama":         nama,
+// 			"phone_number": phonenumber,
+// 			"alamat":       alamat,
+// 			"email":        email,
+// 		},
+// 	}
+// 	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
+// 	if err != nil {
+// 		fmt.Printf("UpdatePelanggan: %v\n", err)
+// 		return
+// 	}
+// 	if result.ModifiedCount == 0 {
+// 		err = errors.New("no data has been changed with the specified ID")
+// 		return
+// 	}
+// 	return nil
+// }
+
 //function delete 
-func DeletePelangganByID(_id primitive.ObjectID, db *mongo.Database, col string) error {
-	Pelanggan := db.Collection(col)
-	filter := bson.M{"_id": _id}
+// func DeletePelangganByID(_id primitive.ObjectID, db *mongo.Database, col string) error {
+// 	Pelanggan := db.Collection(col)
+// 	filter := bson.M{"_id": _id}
 
-	result, err := Pelanggan.DeleteOne(context.TODO(), filter)
-	if err != nil {
-		return fmt.Errorf("error deleting data for ID %s: %s", _id, err.Error())
-	}
+// 	result, err := Pelanggan.DeleteOne(context.TODO(), filter)
+// 	if err != nil {
+// 		return fmt.Errorf("error deleting data for ID %s: %s", _id, err.Error())
+// 	}
 
-	if result.DeletedCount == 0 {
-		return fmt.Errorf("data with ID %s not found", _id)
-	}
+// 	if result.DeletedCount == 0 {
+// 		return fmt.Errorf("data with ID %s not found", _id)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 //function untuk bagian customer 
 func InsertCustomer(nama string, phoneNumber string, alamat string, email []string) interface{} {
@@ -295,26 +296,3 @@ func DeleteCustomerByID(_id primitive.ObjectID, db *mongo.Database, col string) 
 	return nil
 }
 
-//insert barang\
-func InsertBarang(namaProduk string, deskripsi string, harga int, gambar string, stok int) interface{} {
-	var barang model.Barang
-	barang.ID_barang = primitive.NewObjectID()
-	barang.Nama_Produk = namaProduk
-	barang.Deskripsi = deskripsi
-	barang.Harga = harga
-	barang.Gambar = gambar
-	barang.Stok = stok
-	return InsertOneDoc("kantin", "barang", barang)
-}
-
-// func InsertDataProduk(adminID string, nama_produk string, deskripsi string, harga int, gambar string, stok int) interface{} {
-//     var produk model.Produk
-//     produk.IDProduk = primitive.NewObjectID()
-//     produk.AdminID = primitive.NewObjectID() // Assuming adminID is an ObjectID, change this if adminID is different
-//     produk.Nama_Produk = nama_produk
-//     produk.Deskripsi = deskripsi
-//     produk.Harga = harga
-//     produk.Gambar = gambar
-//     produk.Stok = stok
-//     return InsertOneDoc("kantin", "produk", produk)
-// }

@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // insert data customer
@@ -202,3 +203,110 @@ func TestDeleteCartItemFromID(t *testing.T) {
 
 // test untuk pesanan 
 
+//test untuk login 
+func TestRegisterHandler(t *testing.T) {
+	// Setup test database
+	db := module.MongoConnectdb("kantin")
+
+	// Test case input
+	req := model.RegisterRequest{
+		Username: "testuser",
+		Password: "testpassword",
+		Role:     "customer",
+	}
+
+	// Call the signupHandler function
+	message, err := module.RegisterHandler(req, db)
+
+	// Test if there were no errors
+	if err != nil {
+		t.Errorf("Error in signupHandler: %v", err)
+	}
+
+	// Test if the message is as expected
+	expectedMessage := "Registration submitted, waiting for admin approval"
+	if message != expectedMessage {
+		t.Errorf("Expected message: %s, got: %s", expectedMessage, message)
+	}
+
+	// Verify if the user was inserted into the database
+	collection := db.Collection("pending_registrations")
+	var result model.PendingRegistration
+	err = collection.FindOne(context.TODO(), bson.M{"username": req.Username}).Decode(&result)
+	if err != nil {
+		t.Fatalf("Failed to find user in the database: %v", err)
+	}
+
+	// Check if the user data is correct
+	if result.Username != req.Username {
+		t.Errorf("Expected username: %s, got: %s", req.Username, result.Username)
+	}
+
+	// Verify if the password is correctly hashed
+	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(req.Password))
+	if err != nil {
+		t.Fatalf("Password hash mismatch: %v", err)
+	}
+
+	// Print confirmation message
+	fmt.Printf("User %s successfully registered and saved to the database.\n", req.Username)
+}
+
+//UJICOBA APPROVE NYA
+func ApproveRegistration(t *testing.T) {
+	// Setup test database
+	db := module.MongoConnectdb("kantin")
+
+	// Tentukan ID yang sudah ada di koleksi pending_registrations
+	// Misalnya ID sudah diketahui sebelumnya
+	existingID := "677a8fff42740fa6xxxxx" // Ganti dengan ID yang sesuai
+
+	// Mengonversi ID string menjadi ObjectID
+	objectID, err := primitive.ObjectIDFromHex(existingID)
+	if err != nil {
+		t.Fatalf("Failed to convert ID to ObjectID: %v", err)
+	}
+
+	// Ambil data dari koleksi pending_registrations dengan ID yang ada
+	collection := db.Collection("pending_registrations")
+	var result model.PendingRegistration
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&result)
+	if err != nil {
+		t.Fatalf("Failed to find user in pending_registrations collection: %v", err)
+	}
+
+	// Panggil ConfirmRegistration dengan ID yang sudah ada
+	_, user, err := module.ApproveRegistration(existingID, db)
+	if err != nil {
+		t.Fatalf("Error in ApproveRegistration: %v", err)
+	}
+
+	// Verifikasi data yang dipindahkan ke collection pengguna
+	if user.Username != result.Username {
+		t.Errorf("Expected username: %s, got: %s", result.Username, user.Username)
+	}
+	if user.Role != result.Role {
+		t.Errorf("Expected role: %s, got: %s", result.Role, user.Role)
+	}
+
+	// Verifikasi data yang dihapus dari unverified_users
+	var deletedUser model.PendingRegistration
+	err = collection.FindOne(context.TODO(), bson.M{"_id": result.ID}).Decode(&deletedUser)
+	if err == nil {
+		t.Errorf("Expected user to be deleted, but found user in pending_registrations: %v", deletedUser)
+	}
+
+	// Verifikasi data ada di koleksi pengguna
+	collectionUsers := db.Collection("users")
+	var foundUser model.User
+	err = collectionUsers.FindOne(context.TODO(), bson.M{"username": user.Username}).Decode(&foundUser)
+	if err != nil {
+		t.Fatalf("Failed to find user in users collection: %v", err)
+	}
+	if foundUser.Username != user.Username {
+		t.Errorf("Expected username in user: %s, got: %s", user.Username, foundUser.Username)
+	}
+
+	// Print confirmation message
+	fmt.Printf("User %s confirmed and moved to users collection.\n", user.Username)
+}
