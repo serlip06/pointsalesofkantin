@@ -53,7 +53,8 @@ func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID, qua
 	cartItem.Harga = product.Harga
 	cartItem.Quantity = quantity
 	cartItem.SubTotal = subTotal
-	cartItem.NamaProduk = product.Nama_Produk // Menyimpan nama produk jika diperlukan
+	cartItem.Nama_Produk = product.Nama_Produk // Menyimpan nama produk jika diperlukan
+	cartItem.Gambar = product.Gambar// meyimpan data gambar 
 
 	// Menyimpan item ke dalam keranjang
 	result, err := InsertDataCartItem("kantin", "cart_items", cartItem)
@@ -124,7 +125,7 @@ func GetAllCartItems() (cartitems []model.CartItem) {
 }
 
 // Update cart item
-func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID, nama string, harga int, quantity int) error {
+func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID, nama string, harga int, quantity int, gambar string) error {
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
@@ -132,6 +133,8 @@ func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID, nama 
 			"harga":     harga,
 			"quantity":  quantity,
 			"sub_total": harga * quantity, // Menghitung ulang subtotal
+			"gambar":    gambar,    //mengupdate data gambar
+
 		},
 	}
 	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)

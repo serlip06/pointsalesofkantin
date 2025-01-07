@@ -42,10 +42,11 @@ type Customer struct {
 type CartItem struct {
 	IDCartItem primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`               // ID unik untuk item keranjang
 	IDProduk   primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"`   // Referensi ke ID Produk
-	NamaProduk string             `bson:"NamaProduk,omitempty" json:"NamaProduk,omitempty"` //nama untuk produknya
+	Nama_Produk string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"` //nama untuk produknya
 	Harga      int                `bson:"harga,omitempty" json:"harga,omitempty"`           // Harga produk pada saat dimasukkan ke keranjang
 	Quantity   int                `bson:"quantity,omitempty" json:"quantity,omitempty"`     // Jumlah produk dalam keranjang
 	SubTotal   int                `bson:"sub_total,omitempty" json:"sub_total,omitempty"`   // Total harga (Harga * Quantity)
+	Gambar     string             `bson:"gambar,omitempty" json:"gambar,omitempty"`         // Gambar produk
 }
 
 type Pesanan struct {

@@ -133,7 +133,7 @@ func TestInsertDataCartItemFunc(t *testing.T) {
     assert.NoError(t, err)
 
     // Gunakan ID produk yang valid dan sesuaikan dengan format ObjectID
-    idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // id produk : ikan bakar
+    idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // id produk : ayam bakar
     if err != nil {
         t.Fatalf("Invalid ObjectID: %v", err)
     }
