@@ -38,36 +38,37 @@ func SavePendingRegistration(registration model.PendingRegistration, db*mongo.Da
 
 //memindahkan data pending ke data users(function untuk ACC)
 func ApproveRegistration(id string, db *mongo.Database) (model.PendingRegistration, model.User, error) {
-    collectionPending := db.Collection("pending_registrations")
-    collectionUsers := db.Collection("users")
+	// function yang dipake untuk mindahil data progress ke colekcion pengguna 
+	collectionPending := db.Collection("pending_registrations")
+	collectionUsers := db.Collection("users")
 
-    objID, err := primitive.ObjectIDFromHex(id)
-    if err != nil {
-        return model.PendingRegistration{}, model.User{}, err
-    }
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return model.PendingRegistration{}, model.User{}, err
+	}
 
-    var pending model.PendingRegistration
-    err = collectionPending.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&pending)
-    if err != nil {
-        return model.PendingRegistration{}, model.User{}, err
-    }
+	var pending model.PendingRegistration
+	err = collectionPending.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&pending)
+	if err != nil {
+		return model.PendingRegistration{}, model.User{}, err
+	}
 
-    user := model.User{
-        ID:        primitive.NewObjectID(),
-        Username:  pending.Username,
-        Password:  pending.Password,
-        Role:      pending.Role,
-        CreatedAt: time.Now(),
-    }
+	user := model.User{
+		Username:  pending.Username,
+		Password:  pending.Password,
+		Role:      pending.Role,
+		CreatedAt: time.Now(),
+	}
 
-    _, err = collectionUsers.InsertOne(context.Background(), user)
-    if err != nil {
-        return model.PendingRegistration{}, model.User{}, err
-    }
+	_, err = collectionUsers.InsertOne(context.Background(), user)
+	if err != nil {
+		return model.PendingRegistration{}, model.User{}, err
+	}
 
-    _, err = collectionPending.DeleteOne(context.Background(), bson.M{"_id": objID})
-    return pending, user, err
+	_, err = collectionPending.DeleteOne(context.Background(), bson.M{"_id": objID})
+	return pending, user, err
 }
+
 
 //register handler 
 func RegisterHandler(req model.RegisterRequest, db *mongo.Database) (string, error) {
@@ -96,24 +97,7 @@ func RegisterHandler(req model.RegisterRequest, db *mongo.Database) (string, err
 }
 
 // function untuk memanggil data di colecction pending_registration dan user 
-//data pending 
-func GetAllPendingRegistrations(db *mongo.Database) ([]model.PendingRegistration, error) {
-	collection := db.Collection("pending_registrations")
-	cursor, err := collection.Find(context.Background(), bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(context.Background())
-
-	var registrations []model.PendingRegistration
-	if err := cursor.All(context.Background(), &registrations); err != nil {
-		return nil, err
-	}
-
-	return registrations, nil
-}
-
-// data user 
+// GetAllUsers retrieves all user data from the users collection
 func GetAllUsers(db *mongo.Database) ([]model.User, error) {
 	collection := db.Collection("users")
 	cursor, err := collection.Find(context.Background(), bson.M{})
@@ -123,43 +107,66 @@ func GetAllUsers(db *mongo.Database) ([]model.User, error) {
 	defer cursor.Close(context.Background())
 
 	var users []model.User
-	if err := cursor.All(context.Background(), &users); err != nil {
-		return nil, err
+	for cursor.Next(context.Background()) {
+		var user model.User
+		var raw bson.M
+		if err := cursor.Decode(&raw); err != nil {
+			return nil, err
+		}
+
+		// Extract ObjectID and convert to string
+		if objID, ok := raw["_id"].(primitive.ObjectID); ok {
+			raw["_id"] = objID.Hex()
+		}
+
+		// Map raw data to User struct
+		data, err := bson.Marshal(raw)
+		if err != nil {
+			return nil, err
+		}
+		if err := bson.Unmarshal(data, &user); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
 	}
 
 	return users, nil
 }
 
+// GetAllPendingRegistrations retrieves all pending registrations from the pending_registrations collection
+func GetAllPendingRegistrations(db *mongo.Database) ([]model.PendingRegistration, error) {
+	collection := db.Collection("pending_registrations")
+	cursor, err := collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
 
-//cadangan 
-// func ApproveRegistration(id string, db *mongo.Database) (model.PendingRegistration, model.User, error) {
-// 	// function yang dipake untuk mindahil data progress ke colekcion pengguna 
-// 	collectionPending := db.Collection("pending_registrations")
-// 	collectionUsers := db.Collection("users")
+	var registrations []model.PendingRegistration
+	for cursor.Next(context.Background()) {
+		var registration model.PendingRegistration
+		var raw bson.M
+		if err := cursor.Decode(&raw); err != nil {
+			return nil, err
+		}
 
-// 	objID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		return model.PendingRegistration{}, model.User{}, err
-// 	}
+		// Extract ObjectID and convert to string
+		if objID, ok := raw["_id"].(primitive.ObjectID); ok {
+			raw["_id"] = objID.Hex()
+		}
 
-// 	var pending model.PendingRegistration
-// 	err = collectionPending.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&pending)
-// 	if err != nil {
-// 		return model.PendingRegistration{}, model.User{}, err
-// 	}
+		// Map raw data to PendingRegistration struct
+		data, err := bson.Marshal(raw)
+		if err != nil {
+			return nil, err
+		}
+		if err := bson.Unmarshal(data, &registration); err != nil {
+			return nil, err
+		}
 
-// 	user := model.User{
-// 		Username:  pending.Username,
-// 		Password:  pending.Password,
-// 		Role:      pending.Role,
-// 		CreatedAt: time.Now(),
-// 	}
+		registrations = append(registrations, registration)
+	}
 
-// 	_, err = collectionUsers.InsertOne(context.Background(), user)
-// 	if err != nil {
-// 		return model.PendingRegistration{}, model.User{}, err
-// 	}
-
-// 	_, err = collectionPending.DeleteOne(context.Background(), bson.M{"_id": objID})
-// 	return pending, user, err
-// }
+	return registrations, nil
+}

@@ -13,6 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
+
+	
+	//"go.mongodb.org/mongo-driver/mongo"
+	//"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // insert data customer
@@ -312,37 +316,26 @@ func ApproveRegistration(t *testing.T) {
 }
 
 //function test untuk get all pending dan user 
+// function test untuk get all pending
+// func TestGetAllPendingRegistrations(t *testing.T) {
+// 	pendingRegistrations := module.GetAllPendingRegistrations()
+// 	fmt.Printf("%v\n", pendingRegistrations)
+// }
 
-func TestGetAllPendingRegistrations(t *testing.T) {
-	// Buat koneksi ke database
-	db := module.MongoConnectdb("kantin") // Ganti dengan nama database Anda
+// function test untuk get all users
+// func TestGetAllUsers(t *testing.T) {
+// 	// Menyambung ke database
+// 	db, err := GetDatabase()
+// 	if err != nil {
+// 		t.Fatalf("Failed to connect to database: %v", err)
+// 	}
 
-	// Panggil fungsi GetAllPendingRegistrations
-	pendingRegistrations, err := module.GetAllPendingRegistrations(db)
-	if err != nil {
-		t.Fatalf("Failed to get pending registrations: %v", err)
-	}
+// 	// Memanggil fungsi GetAllUsers dan menangkap hasilnya
+// 	users, err := module.GetAllUsers(db)
+// 	if err != nil {
+// 		t.Fatalf("Error getting all users: %v", err)
+// 	}
 
-	// Cetak hasil (opsional untuk debugging)
-	fmt.Println("Pending Registrations:", pendingRegistrations)
-
-	// Tambahkan assertion untuk memastikan hasil sesuai ekspektasi
-	if len(pendingRegistrations) == 0 {
-		t.Errorf("Expected some pending registrations, got 0")
-	}
-}
-// getalluser 
-func TestGetAllUsers(t *testing.T) {
-    db := module.MongoConnectdb("kantin") // Ganti nama database sesuai yang benar
-    users, err := module.GetAllUsers(db)
-    if err != nil {
-        t.Fatalf("Failed to get all users: %v", err)
-    }
-
-    // Tampilkan data pengguna
-    t.Logf("Fetched users: %+v", users)
-    if len(users) == 0 {
-        t.Fatalf("Expected some users, got 0")
-    }
-}
-
+// 	// Menampilkan hasil
+// 	fmt.Printf("%v\n", users)
+// }

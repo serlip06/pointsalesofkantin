@@ -37,16 +37,15 @@ type Customer struct {
 	Email        []string           `bson:"email,omitempty" json:"email"`
 }
 
-
 // struct untuk item dalam keranjang
 type CartItem struct {
-	IDCartItem primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`               // ID unik untuk item keranjang
-	IDProduk   primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"`   // Referensi ke ID Produk
+	IDCartItem  primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`                 // ID unik untuk item keranjang
+	IDProduk    primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"`     // Referensi ke ID Produk
 	Nama_Produk string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"` //nama untuk produknya
-	Harga      int                `bson:"harga,omitempty" json:"harga,omitempty"`           // Harga produk pada saat dimasukkan ke keranjang
-	Quantity   int                `bson:"quantity,omitempty" json:"quantity,omitempty"`     // Jumlah produk dalam keranjang
-	SubTotal   int                `bson:"sub_total,omitempty" json:"sub_total,omitempty"`   // Total harga (Harga * Quantity)
-	Gambar     string             `bson:"gambar,omitempty" json:"gambar,omitempty"`         // Gambar produk
+	Harga       int                `bson:"harga,omitempty" json:"harga,omitempty"`             // Harga produk pada saat dimasukkan ke keranjang
+	Quantity    int                `bson:"quantity,omitempty" json:"quantity,omitempty"`       // Jumlah produk dalam keranjang
+	SubTotal    int                `bson:"sub_total,omitempty" json:"sub_total,omitempty"`     // Total harga (Harga * Quantity)
+	Gambar      string             `bson:"gambar,omitempty" json:"gambar,omitempty"`           // Gambar produk
 }
 
 type Pesanan struct {
@@ -58,37 +57,36 @@ type Pesanan struct {
 	TanggalPesan string             `bson:"tanggal_pesan,omitempty" json:"tanggal_pesan,omitempty"`
 }
 
-//stuct untuk login register 
+// stuct untuk login register
 type User struct {
-    ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
-    Username  string    `bson:"username" json:"username"`          // Username pengguna
-    Password  string    `bson:"password" json:"password"`          // Password dalam bentuk hash
-    Role      string    `bson:"role" json:"role"`                  // Peran pengguna (admin, customer, kasir, operator)
-    CreatedAt time.Time `bson:"created_at" json:"created_at"`      // Waktu pembuatan akun
+	ID        string    `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
+	Username  string    `bson:"username" json:"username"`          // Username pengguna
+	Password  string    `bson:"password" json:"password"`          // Password dalam bentuk hash
+	Role      string    `bson:"role" json:"role"`                  // Peran pengguna (admin, customer, kasir, operator)
+	CreatedAt time.Time `bson:"created_at" json:"created_at"`      // Waktu pembuatan akun
 }
 
-type  PendingRegistration struct {
-    ID         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
-    Username    string    `bson:"username" json:"username"`          // Username pengguna
-    Password    string    `bson:"password" json:"password"`          // Password dalam bentuk hash
-    Role        string    `bson:"role" json:"role"`                  // Peran pengguna (customer, kasir, operator)
-    SubmittedAt time.Time `bson:"submitted_at" json:"submitted_at"`  // Waktu registrasi
+type PendingRegistration struct {
+	ID          string    `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
+	Username    string    `bson:"username" json:"username"`          // Username pengguna
+	Password    string    `bson:"password" json:"password"`          // Password dalam bentuk hash
+	Role        string    `bson:"role" json:"role"`                  // Peran pengguna (customer, kasir, operator)
+	SubmittedAt time.Time `bson:"submitted_at" json:"submitted_at"`  // Waktu registrasi
 }
 
 type RegisterRequest struct {
-    Username string `json:"username"`
-    Password string `json:"password"`
-    Role     string `json:"role"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
 }
 
-type LoginRequest  struct {
-    Username string `json:"username"` // Username pengguna
-    Password string `json:"password"` // Password pengguna
+type LoginRequest struct {
+	Username string `json:"username"` // Username pengguna
+	Password string `json:"password"` // Password pengguna
 }
 
 type Response struct {
-    Status  string `json:"status"`  // Status operasi (success, error)
-    Message string `json:"message"` // Pesan deskripsi
-    // Data    any    `json:"data"`    // Data tambahan (opsional)
+	Status  string `json:"status"`  // Status operasi (success, error)
+	Message string `json:"message"` // Pesan deskripsi
+	// Data    any    `json:"data"`    // Data tambahan (opsional)
 }
-
