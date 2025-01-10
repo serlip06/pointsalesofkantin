@@ -60,7 +60,7 @@ type Pesanan struct {
 
 //stuct untuk login register 
 type User struct {
-    ID        string    `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
+    ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
     Username  string    `bson:"username" json:"username"`          // Username pengguna
     Password  string    `bson:"password" json:"password"`          // Password dalam bentuk hash
     Role      string    `bson:"role" json:"role"`                  // Peran pengguna (admin, customer, kasir, operator)
@@ -68,7 +68,7 @@ type User struct {
 }
 
 type  PendingRegistration struct {
-    ID          string    `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
+    ID         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"` // ID unik dari MongoDB
     Username    string    `bson:"username" json:"username"`          // Username pengguna
     Password    string    `bson:"password" json:"password"`          // Password dalam bentuk hash
     Role        string    `bson:"role" json:"role"`                  // Peran pengguna (customer, kasir, operator)

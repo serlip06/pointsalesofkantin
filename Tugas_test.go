@@ -310,3 +310,39 @@ func ApproveRegistration(t *testing.T) {
 	// Print confirmation message
 	fmt.Printf("User %s confirmed and moved to users collection.\n", user.Username)
 }
+
+//function test untuk get all pending dan user 
+
+func TestGetAllPendingRegistrations(t *testing.T) {
+	// Buat koneksi ke database
+	db := module.MongoConnectdb("kantin") // Ganti dengan nama database Anda
+
+	// Panggil fungsi GetAllPendingRegistrations
+	pendingRegistrations, err := module.GetAllPendingRegistrations(db)
+	if err != nil {
+		t.Fatalf("Failed to get pending registrations: %v", err)
+	}
+
+	// Cetak hasil (opsional untuk debugging)
+	fmt.Println("Pending Registrations:", pendingRegistrations)
+
+	// Tambahkan assertion untuk memastikan hasil sesuai ekspektasi
+	if len(pendingRegistrations) == 0 {
+		t.Errorf("Expected some pending registrations, got 0")
+	}
+}
+// getalluser 
+func TestGetAllUsers(t *testing.T) {
+    db := module.MongoConnectdb("kantin") // Ganti nama database sesuai yang benar
+    users, err := module.GetAllUsers(db)
+    if err != nil {
+        t.Fatalf("Failed to get all users: %v", err)
+    }
+
+    // Tampilkan data pengguna
+    t.Logf("Fetched users: %+v", users)
+    if len(users) == 0 {
+        t.Fatalf("Expected some users, got 0")
+    }
+}
+
