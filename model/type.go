@@ -90,3 +90,33 @@ type Response struct {
 	Message string `json:"message"` // Pesan deskripsi
 	// Data    any    `json:"data"`    // Data tambahan (opsional)
 }
+
+// notifikasi 
+
+// Struct untuk notifikasi produk terbaru
+type NewProductNotification struct {
+    IDProduk   string `json:"id_produk"`   // ID unik produk
+    Nama_Produk string `json:"nama_produk"` // Nama produk baru
+    Kategori    string `json:"kategori"`    // Kategori produk
+    AddedBy     string `json:"added_by"`    // Admin/Operator yang menambahkan produk
+    Timestamp   string `json:"timestamp"`   // Waktu produk ditambahkan
+    Message     string `json:"message"`     // Pesan notifikasi
+}
+
+// Struct untuk notifikasi stok menipis
+type LowStockNotification struct {
+	IDProduk   string `json:"id_produk"`   // ID unik produk
+    Nama_Produk string `json:"nama_produk"` // Nama produk 
+    CurrentStock int     `json:"current_stock"` // Jumlah stok saat ini
+    Threshold    int     `json:"threshold"`     // Ambang batas stok
+    NotifiedAt   string  `json:"notified_at"`   // Waktu notifikasi dibuat
+    Message      string  `json:"message"`       // Pesan notifikasi
+}
+
+// Struct untuk notifikasi stok habis
+type OutOfStockNotification struct {
+	IDProduk   string `json:"id_produk"`   // ID unik produk
+    Nama_Produk string `json:"nama_produk"` // Nama produk baru
+    NotifiedAt  string `json:"notified_at"`  // Waktu notifikasi dibuat
+    Message     string `json:"message"`      // Pesan notifikasi
+}
