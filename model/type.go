@@ -21,6 +21,7 @@ type Produk struct {
 	Gambar      string             `bson:"gambar,omitempty" json:"gambar,omitempty"`
 	Stok        int                `bson:"stok,omitempty" json:"stok,omitempty"`
 	Kategori    string             `bson:"kategori,omitempty" json:"kategori,omitempty"`
+	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 }
 
 type Transaksi struct {
@@ -91,32 +92,32 @@ type Response struct {
 	// Data    any    `json:"data"`    // Data tambahan (opsional)
 }
 
-// notifikasi 
+// notifikasi
 
 // Struct untuk notifikasi produk terbaru
 type NewProductNotification struct {
-    IDProduk   string `json:"id_produk"`   // ID unik produk
-    Nama_Produk string `json:"nama_produk"` // Nama produk baru
-    Kategori    string `json:"kategori"`    // Kategori produk
-    AddedBy     string `json:"added_by"`    // Admin/Operator yang menambahkan produk
-    Timestamp   string `json:"timestamp"`   // Waktu produk ditambahkan
-    Message     string `json:"message"`     // Pesan notifikasi
+	IDProduk    string `json:"id_produk"`   // ID unik produk
+	Nama_Produk string `json:"nama_produk"` // Nama produk baru
+	Kategori    string `json:"kategori"`    // Kategori produk
+	AddedBy     string `json:"added_by"`    // Admin/Operator yang menambahkan produk
+	Timestamp   string `json:"timestamp"`   // Waktu produk ditambahkan
+	Message     string `json:"message"`     // Pesan notifikasi
 }
 
 // Struct untuk notifikasi stok menipis
 type LowStockNotification struct {
-	IDProduk   string `json:"id_produk"`   // ID unik produk
-    Nama_Produk string `json:"nama_produk"` // Nama produk 
-    CurrentStock int     `json:"current_stock"` // Jumlah stok saat ini
-    Threshold    int     `json:"threshold"`     // Ambang batas stok
-    NotifiedAt   string  `json:"notified_at"`   // Waktu notifikasi dibuat
-    Message      string  `json:"message"`       // Pesan notifikasi
+	IDProduk     string `json:"id_produk"`     // ID unik produk
+	Nama_Produk  string `json:"nama_produk"`   // Nama produk
+	CurrentStock int    `json:"current_stock"` // Jumlah stok saat ini
+	Threshold    int    `json:"threshold"`     // Ambang batas stok
+	NotifiedAt   string `json:"notified_at"`   // Waktu notifikasi dibuat
+	Message      string `json:"message"`       // Pesan notifikasi
 }
 
 // Struct untuk notifikasi stok habis
 type OutOfStockNotification struct {
-	IDProduk   string `json:"id_produk"`   // ID unik produk
-    Nama_Produk string `json:"nama_produk"` // Nama produk baru
-    NotifiedAt  string `json:"notified_at"`  // Waktu notifikasi dibuat
-    Message     string `json:"message"`      // Pesan notifikasi
+	IDProduk    string `json:"id_produk"`   // ID unik produk
+	Nama_Produk string `json:"nama_produk"` // Nama produk baru
+	NotifiedAt  string `json:"notified_at"` // Waktu notifikasi dibuat
+	Message     string `json:"message"`     // Pesan notifikasi
 }

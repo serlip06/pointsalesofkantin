@@ -72,11 +72,11 @@ func TestDeleteCustomerByID(t *testing.T) {
 
 // test untuk produknya
 func TestInsertDataProduk(t *testing.T) {
-	nama_produk := "Pangsit pedas"
-	deskripsi := "Pangsit pedas yang enak"
-	gambar := "https://i.pinimg.com/736x/b2/db/a4/b2dba44f2dd0ad242e0575fd17ad94c7.jpg"
-	harga := 10000
-	stok := 10
+	nama_produk := "Cireng"
+	deskripsi := "Cireng pedas yang enak"
+	gambar := "https://asset.kompas.com/crops/AN59bpBBYFwpIg7Xm8LFx16ldpk=/0x0:698x465/1200x800/data/photo/2024/04/12/6618d397934e0.jpg"
+	harga := 5000
+	stok := 15
 	kategori := "Makanan"
 
 	insertedID, err := module.InsertDataProduk(nama_produk, deskripsi, harga, gambar, stok, kategori)
@@ -118,7 +118,7 @@ func TestGetAllProduks(t *testing.T) {
 
 // get produk by id
 func TestProduksFromID(t *testing.T) {
-	id := "674b290af85cc65485585875" // idnya bolu 
+	id := "678737e16677cb3541cb0ba6" // idnya bolu 
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Fatalf("error converting id to ObjectID: %v", err)

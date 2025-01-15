@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
+	"time"
 	"github.com/serlip06/pointsalesofkantin/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -44,8 +44,10 @@ func InsertDataProduk(nama_produk string, deskripsi string, harga int, gambar st
 	produk.Harga = harga
 	produk.Gambar = gambar
 	produk.Stok = stok
-	produk.Kategori = kategori // Tambahkan kategori
+	produk.Kategori = kategori
+	produk.CreatedAt = time.Now() // Atur CreatedAt di properti produk
 
+	// Simpan produk ke database
 	result := InsertData("kantin", "produk", produk)
 	if result == nil {
 		return nil, errors.New("gagal menyimpan produk")
@@ -53,6 +55,7 @@ func InsertDataProduk(nama_produk string, deskripsi string, harga int, gambar st
 
 	return result, nil
 }
+
 
 // memanggil data by id
 func GetProduksFromID(_id primitive.ObjectID, db *mongo.Database, col string) (produk model.Produk, errs error) {
@@ -91,6 +94,10 @@ func GetAllProduks(kategori string) (produks []model.Produk, err error) {
 		if err := cursor.Decode(&produk); err != nil {
 			fmt.Printf("GetAllProduks: %v\n", err)
 			continue
+		}
+		// Validasi tambahan (opsional)
+		if produk.CreatedAt.IsZero() {
+			produk.CreatedAt = time.Now() // Default ke waktu sekarang jika kosong
 		}
 		produks = append(produks, produk)
 	}
