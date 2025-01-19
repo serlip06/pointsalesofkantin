@@ -165,6 +165,67 @@ func DeleteCartItemByID(_id primitive.ObjectID, db *mongo.Database, col string) 
 	return nil
 }
 
+//logika untuk chartitem jaga jaga aja 
+func InsertOrUpdateCartItem(db *mongo.Database, idProduk primitive.ObjectID, quantity int) (interface{}, error) {
+	collection := db.Collection("cart_items")
+
+	// Cek apakah produk dengan IDProduk yang sama sudah ada di keranjang
+	filter := bson.M{"id_produk": idProduk}
+	var existingItem model.CartItem
+	err := collection.FindOne(context.TODO(), filter).Decode(&existingItem)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// Jika tidak ada, tambahkan sebagai item baru
+			product, err := GetProduksFromID(idProduk, db, "produk")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get product: %v", err)
+			}
+
+			// Hitung subtotal
+			subTotal := product.Harga * quantity
+
+			// Buat item keranjang baru
+			newItem := model.CartItem{
+				IDCartItem:  primitive.NewObjectID(),
+				IDProduk:    idProduk,
+				Nama_Produk: product.Nama_Produk,
+				Harga:       product.Harga,
+				Quantity:    quantity,
+				SubTotal:    subTotal,
+				Gambar:      product.Gambar,
+			}
+
+			// Simpan ke database
+			result, err := collection.InsertOne(context.TODO(), newItem)
+			if err != nil {
+				return nil, fmt.Errorf("failed to insert cart item: %v", err)
+			}
+
+			return result.InsertedID, nil
+		}
+		return nil, fmt.Errorf("error finding cart item: %v", err)
+	}
+
+	// Jika item sudah ada, update quantity dan subtotal
+	newQuantity := existingItem.Quantity + quantity
+	newSubTotal := newQuantity * existingItem.Harga
+
+	update := bson.M{
+		"$set": bson.M{
+			"quantity":  newQuantity,
+			"sub_total": newSubTotal,
+		},
+	}
+	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update cart item: %v", err)
+	}
+
+	return existingItem.IDCartItem, nil
+}
+
+
 // ini filter untuk kategorinya 
 // func GetAllCartItems(kategori string) ([]model.CartItem, error) {
 // 	collection, err :=  MongoConnectdatabase("kantin")

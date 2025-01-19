@@ -120,45 +120,6 @@ func GetAllProduk() (produks [] model.Produk) {
 	return produks
 }
 
-func InsertTransaksi(metodePembayaran string, tanggalWaktu string) interface{} {
-	var transaksi model.Transaksi
-	transaksi.ID = primitive.NewObjectID()
-	transaksi.Metode_Pembayaran = metodePembayaran
-	transaksi.Tanggal_Waktu = tanggalWaktu
-	return InsertOneDoc("kantin", "kantin_transaksi", transaksi)
-}
-
-func GetTransaksiByID(transaksiID primitive.ObjectID) (transaksi model.Transaksi) {
-	collection := MongoConnect("kantin").Collection("kantin_transaksi")
-	filter := bson.M{"_id": transaksiID}
-	err := collection.FindOne(context.TODO(), filter).Decode(&transaksi)
-	if err != nil {
-		fmt.Printf("GetTransaksiByID: %v\n", err)
-	}
-	return transaksi
-}
-
-func GetAllTransaksi() (transaksis [] model.Transaksi) {
-	collection := MongoConnect("kantin").Collection("kantin_transaksi")
-	cursor, err := collection.Find(context.TODO(), bson.D{})
-	if err != nil {
-		fmt.Printf("GetAllTransaksi: %v\n", err)
-		return nil
-	}
-	defer cursor.Close(context.TODO())
-	for cursor.Next(context.Background()) {
-		var transaksi model.Transaksi
-		if err := cursor.Decode(&transaksi); err != nil {
-			fmt.Printf("GetAllTransaksi: %v\n", err)
-			continue
-		}
-		transaksis = append(transaksis, transaksi)
-	}
-	if err := cursor.Err(); err != nil {
-		fmt.Printf("GetAllTransaksi: %v\n", err)
-	}
-	return transaksis
-}
 
 // update function
 // func UpdatePelanggan(db *mongo.Database, col string, id primitive.ObjectID, nama string, phonenumber string, alamat string, email []string) (err error) {

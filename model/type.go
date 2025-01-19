@@ -24,10 +24,15 @@ type Produk struct {
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 }
 
+// struct transaksi
 type Transaksi struct {
-	ID                primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	Metode_Pembayaran string             `bson:"metode_pembayaran,omitempty" json:"metode_pembayaran,omitempty"`
-	Tanggal_Waktu     string             `bson:"tanggal_waktu,omitempty" json:"tanggal_waktu,omitempty"`
+	IDTransaksi      primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"` // ID unik transaksi
+	IDUser           primitive.ObjectID `bson:"id_user" json:"id_user"`             // Referensi ke ID pengguna yang melakukan transaksi
+	Username         string             `bson:"username" json:"username"`           // Username pengguna
+	Items            []CartItem         `bson:"items" json:"items"`                 // Daftar item dalam transaksi (dari keranjang)
+	TotalHarga       int                `bson:"total_harga" json:"total_harga"`     // Total harga seluruh item
+	CreatedAt        time.Time          `bson:"tanggal" json:"tanggal"`             // Tanggal transaksi
+	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // metode pembayaran
 }
 
 type Customer struct {

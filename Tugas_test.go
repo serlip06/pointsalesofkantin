@@ -6,15 +6,13 @@ import (
 
 	"context"
 	//"github.com/rogpeppe/go-internal/module"
-	"github.com/serlip06/pointsalesofkantin/module"
 	"github.com/serlip06/pointsalesofkantin/model"
+	"github.com/serlip06/pointsalesofkantin/module"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
-
-	
 	//"go.mongodb.org/mongo-driver/mongo"
 	//"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -118,7 +116,7 @@ func TestGetAllProduks(t *testing.T) {
 
 // get produk by id
 func TestProduksFromID(t *testing.T) {
-	id := "678737e16677cb3541cb0ba6" // idnya bolu 
+	id := "678737e16677cb3541cb0ba6" // idnya bolu
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Fatalf("error converting id to ObjectID: %v", err)
@@ -130,53 +128,53 @@ func TestProduksFromID(t *testing.T) {
 	fmt.Println(profil)
 }
 
-//test untuk masuk keranjang
-//insert to cartitme (keranjang)
+// test untuk masuk keranjang
+// insert to cartitme (keranjang)
 func TestInsertDataCartItemFunc(t *testing.T) {
-    db, err := module.MongoConnectdatabase("kantin") // Nama database yang benar
-    assert.NoError(t, err)
+	db, err := module.MongoConnectdatabase("kantin") // Nama database yang benar
+	assert.NoError(t, err)
 
-    // Gunakan ID produk yang valid dan sesuaikan dengan format ObjectID
-    idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // id produk : ayam bakar
-    if err != nil {
-        t.Fatalf("Invalid ObjectID: %v", err)
-    }
+	// Gunakan ID produk yang valid dan sesuaikan dengan format ObjectID
+	idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // id produk : ayam bakar
+	if err != nil {
+		t.Fatalf("Invalid ObjectID: %v", err)
+	}
 
-    // Pastikan ID tersebut ada di database
-    collection := db.Collection("produk")
-    var product model.Produk
-    err = collection.FindOne(context.TODO(), bson.M{"_id": idProduk}).Decode(&product)
-    if err != nil {
-        t.Fatalf("Product with ID %v not found: %v", idProduk, err)
-    }
+	// Pastikan ID tersebut ada di database
+	collection := db.Collection("produk")
+	var product model.Produk
+	err = collection.FindOne(context.TODO(), bson.M{"_id": idProduk}).Decode(&product)
+	if err != nil {
+		t.Fatalf("Product with ID %v not found: %v", idProduk, err)
+	}
 
-    // Lanjutkan dengan pengujian InsertDataCartItemFunc
-    quantity := 2
-    result, err := module.InsertDataCartItemFunc(db, idProduk, quantity)
+	// Lanjutkan dengan pengujian InsertDataCartItemFunc
+	quantity := 2
+	result, err := module.InsertDataCartItemFunc(db, idProduk, quantity)
 
-    // Verifikasi hasil
-    assert.NoError(t, err)
-    assert.NotNil(t, result)
+	// Verifikasi hasil
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
 }
 
 // //get cartitemfromid
 func TestGetCartItemFromID(t *testing.T) {
-    // Setup database dan koleksi
-    db, err := module.MongoConnectdatabase("kantin")
-    assert.NoError(t, err)
+	// Setup database dan koleksi
+	db, err := module.MongoConnectdatabase("kantin")
+	assert.NoError(t, err)
 
-    // ID cart item yang valid, misalnya ID yang sudah ada di database
-    id, err := primitive.ObjectIDFromHex("676fb8a26214462f56e4965d") // Ganti dengan ID yang valid
-    assert.NoError(t, err) // Tambahkan ini untuk menangani error
+	// ID cart item yang valid, misalnya ID yang sudah ada di database
+	id, err := primitive.ObjectIDFromHex("676fb8a26214462f56e4965d") // Ganti dengan ID yang valid
+	assert.NoError(t, err)                                           // Tambahkan ini untuk menangani error
 
-    // Panggil fungsi GetCartItemFromID
-    cartItem, err := module.GetCartItemFromID(id, db, "cart_items")
+	// Panggil fungsi GetCartItemFromID
+	cartItem, err := module.GetCartItemFromID(id, db, "cart_items")
 
-    // Verifikasi hasil
-    assert.NoError(t, err)
-    assert.NotNil(t, cartItem)
-    assert.Equal(t, id, cartItem.IDCartItem) // Sesuaikan atribut dengan nama di struct Anda
-    // assert.Equal(t, "NamaProduk yang diharapkan", cartItem.NamaProduk) // Tambahkan verifikasi field lain jika perlu
+	// Verifikasi hasil
+	assert.NoError(t, err)
+	assert.NotNil(t, cartItem)
+	assert.Equal(t, id, cartItem.IDCartItem) // Sesuaikan atribut dengan nama di struct Anda
+	// assert.Equal(t, "NamaProduk yang diharapkan", cartItem.NamaProduk) // Tambahkan verifikasi field lain jika perlu
 }
 
 // //get all cartitem
@@ -205,9 +203,9 @@ func TestDeleteCartItemFromID(t *testing.T) {
 	}
 }
 
-// test untuk pesanan 
+// test untuk pesanan
 
-//test untuk login 
+// test untuk login
 func TestRegisterHandler(t *testing.T) {
 	// Setup test database
 	db := module.MongoConnectdb("kantin")
@@ -256,7 +254,7 @@ func TestRegisterHandler(t *testing.T) {
 	fmt.Printf("User %s successfully registered and saved to the database.\n", req.Username)
 }
 
-//UJICOBA APPROVE NYA
+// UJICOBA APPROVE NYA
 func ApproveRegistration(t *testing.T) {
 	// Setup test database
 	db := module.MongoConnectdb("kantin")
@@ -315,7 +313,7 @@ func ApproveRegistration(t *testing.T) {
 	fmt.Printf("User %s confirmed and moved to users collection.\n", user.Username)
 }
 
-//function test untuk get all pending dan user 
+//function test untuk get all pending dan user
 // function test untuk get all pending
 // func TestGetAllPendingRegistrations(t *testing.T) {
 // 	pendingRegistrations := module.GetAllPendingRegistrations()
@@ -338,4 +336,147 @@ func ApproveRegistration(t *testing.T) {
 
 // 	// Menampilkan hasil
 // 	fmt.Printf("%v\n", users)
+// }
+
+// test untuk transaksi
+func TestInsertTransaksi(t *testing.T) {
+	// Mock data untuk pengujian
+	idUser, err := primitive.ObjectIDFromHex("678139a7bd523609affa109a") // Ganti dengan ID yang sesuai
+	if err != nil {
+		t.Errorf("Error converting ObjectID: %v\n", err)
+		return
+	}
+
+	username := "Nicky" // Ganti dengan username yang sesuai
+	metodePembayaran := "Bayar Langsung"
+
+	// Mock data untuk item keranjang
+	items := []model.CartItem{
+		{
+			IDCartItem:  primitive.NewObjectID(),
+			IDProduk:    primitive.NewObjectID(),
+			Nama_Produk: "Thai Tea",
+			Harga:       5000,
+			Quantity:    3,
+			SubTotal:    15000,
+			Gambar:      "https://th.bing.com/th/id/OIP.AfTYyVvuiEzo20poD4EnsgHaHa?rs=1&pid=ImgDetMain",
+		},
+		{
+			IDCartItem:  primitive.NewObjectID(),
+			IDProduk:    primitive.NewObjectID(),
+			Nama_Produk: "Mie Pedas",
+			Harga:       15000,
+			Quantity:    1,
+			SubTotal:    15000,
+			Gambar:      "https://i.pinimg.com/564x/6c/9c/fb/6c9cfbda40f0d15572fb59e4ad30965e.jpg",
+		},
+	}
+
+	// Panggil fungsi InsertTransaksi
+	insertedID, err := module.InsertTransaksi(idUser, username, items, metodePembayaran)
+	if err != nil {
+		t.Errorf("Error inserting transaksi: %v", err)
+		return
+	}
+	fmt.Printf("Inserted Transaksi ID: %v\n", insertedID)
+
+	fmt.Printf("Inserted Transaksi ID: %v\n", insertedID)
+}
+
+// transakasi get byid and get all
+
+func TestGetTransaksiByID(t *testing.T) {
+	// Masukkan ID transaksi yang sudah ada (misalnya dari ID yang Anda tentukan)
+	id := "678c9ffa0bcc1355f48e2782" // ID yang sudah ada
+	transaksiID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Fatalf("error converting id to ObjectID: %v", err)
+	}
+
+	// Panggil fungsi GetTransaksiByID
+	transaksi, err := module.GetTransaksiByID(transaksiID)
+	if err != nil {
+		t.Errorf("Error retrieving transaksi: %v", err)
+		return
+	}
+
+	// Output transaksi yang berhasil ditemukan
+	fmt.Printf("Retrieved Transaksi: %+v\n", transaksi)
+}
+
+
+func TestGetAllTransaksi(t *testing.T) {
+	// Panggil fungsi GetAllTransaksi
+	transaksis, err := module.GetAllTransaksi()
+	if err != nil {
+		t.Errorf("Error retrieving all transaksi: %v", err)
+		return
+	}
+	if len(transaksis) == 0 {
+		t.Errorf("No transaksi retrieved")
+		return
+	}
+	for _, transaksi := range transaksis {
+		fmt.Printf("Transaksi: %+v\n", transaksi)
+	}
+}
+
+// delete transaksi byid 
+func TestDeleteTransaksiByID(t *testing.T) {
+	id := "678ca4e99a64a4a6842cc7c0" //id transaksi punya nicky
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Fatalf("error converting id to ObjectID: %v", err)
+	}
+	err = module.DeleteTransaksiByID(objectID, module.MongoConn, "kantin_transaksi")
+	if err != nil {
+		t.Fatalf("error calling DeleteTransaksiByID: %v", err)
+	}
+
+	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan GetTransaksiByID
+	_, err = module.GetTransaksiByID(objectID)
+	if err == nil {
+		t.Fatalf("expected data to be deleted, but it still exists")
+	}
+}
+
+
+// func TestGetTransaksiByID(t *testing.T) {
+// 	// Insert transaksi terlebih dahulu untuk mendapatkan ID
+// 	idUser := primitive.NewObjectID()
+// 	username := "test_user"
+// 	metodePembayaran := "Bayar Langsung"
+
+// 	items := []model.CartItem{
+// 		{
+// 			IDCartItem:  primitive.NewObjectID(),
+// 			IDProduk:    primitive.NewObjectID(),
+// 			Nama_Produk: "Thai Tea",
+// 			Harga:       5000,
+// 			Quantity:    3,
+// 			SubTotal:    15000,
+// 			Gambar:      "https://th.bing.com/th/id/OIP.AfTYyVvuiEzo20poD4EnsgHaHa?rs=1&pid=ImgDetMain",
+// 		},
+// 	}
+
+// 	insertedID, err := module.InsertTransaksi(idUser, username, items, metodePembayaran)
+// 	if err != nil {
+// 		t.Errorf("Error inserting transaksi: %v", err)
+// 		return
+// 	}
+
+// 	// Ambil ID transaksi yang baru saja dibuat
+// 	transaksiID, ok := insertedID.(primitive.ObjectID)
+// 	if !ok {
+// 		t.Errorf("Inserted ID is not a valid ObjectID")
+// 		return
+// 	}
+
+// 	// Panggil fungsi GetTransaksiByID
+// 	transaksi, err := module.GetTransaksiByID(transaksiID)
+// 	if err != nil {
+// 		t.Errorf("Error retrieving transaksi: %v", err)
+// 		return
+// 	}
+// 	fmt.Printf("Retrieved Transaksi: %+v\n", transaksi)
 // }

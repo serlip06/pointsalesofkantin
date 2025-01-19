@@ -134,6 +134,28 @@ func GetAllUsers(db *mongo.Database) ([]model.User, error) {
 	return users, nil
 }
 
+// Fungsi untuk mendapatkan pengguna berdasarkan ID
+func GetUserByID(userID string, db *mongo.Database) (*model.User, error) {
+	collection := db.Collection("users")
+	var user model.User
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID format: %v", err)
+	}
+
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user dengan ID %s tidak ditemukan", userID)
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+
 // GetAllPendingRegistrations retrieves all pending registrations from the pending_registrations collection
 func GetAllPendingRegistrations(db *mongo.Database) ([]model.PendingRegistration, error) {
 	collection := db.Collection("pending_registrations")
