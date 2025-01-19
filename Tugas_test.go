@@ -341,13 +341,13 @@ func ApproveRegistration(t *testing.T) {
 // test untuk transaksi
 func TestInsertTransaksi(t *testing.T) {
 	// Mock data untuk pengujian
-	idUser, err := primitive.ObjectIDFromHex("678139a7bd523609affa109a") // Ganti dengan ID yang sesuai
+	idUser, err := primitive.ObjectIDFromHex("6784d0ce0e8e100dae5a9921") // Ganti dengan ID yang sesuai
 	if err != nil {
 		t.Errorf("Error converting ObjectID: %v\n", err)
 		return
 	}
 
-	username := "Nicky" // Ganti dengan username yang sesuai
+	username := "Serli" // Ganti dengan username yang sesuai
 	metodePembayaran := "Bayar Langsung"
 
 	// Mock data untuk item keranjang

@@ -31,7 +31,7 @@ type Transaksi struct {
 	Username         string             `bson:"username" json:"username"`           // Username pengguna
 	Items            []CartItem         `bson:"items" json:"items"`                 // Daftar item dalam transaksi (dari keranjang)
 	TotalHarga       int                `bson:"total_harga" json:"total_harga"`     // Total harga seluruh item
-	CreatedAt        time.Time          `bson:"tanggal" json:"tanggal"`             // Tanggal transaksi
+	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`             // Tanggal transaksi
 	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // metode pembayaran
 }
 
