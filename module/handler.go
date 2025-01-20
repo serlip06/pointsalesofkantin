@@ -2,7 +2,7 @@ package module
 
 import (
 	"context"
-	//"errors"
+	"errors"
 	"fmt"
 	"time"
 
@@ -155,6 +155,18 @@ func GetUserByID(userID string, db *mongo.Database) (*model.User, error) {
 	return &user, nil
 }
 
+func GetUserFromID(_id primitive.ObjectID, db *mongo.Database, col string) (user model.User, errs error) {
+	User := db.Collection(col)
+	filter := bson.M{"_id": _id}
+	err := User.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return user, fmt.Errorf("no data found for ID %s", _id)
+		}
+		return user, fmt.Errorf("error retrieving data for ID %s: %s", _id, err.Error())
+	}
+	return user, nil
+}
 
 // GetAllPendingRegistrations retrieves all pending registrations from the pending_registrations collection
 func GetAllPendingRegistrations(db *mongo.Database) ([]model.PendingRegistration, error) {
