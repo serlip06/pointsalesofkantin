@@ -26,12 +26,12 @@ type Produk struct {
 
 // struct transaksi
 type Transaksi struct {
-	IDTransaksi      primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"` // ID unik transaksi
-	IDUser           primitive.ObjectID `bson:"id_user" json:"id_user"`             // Referensi ke ID pengguna yang melakukan transaksi
-	Username         string             `bson:"username" json:"username"`           // Username pengguna
-	Items            []CartItem         `bson:"items" json:"items"`                 // Daftar item dalam transaksi (dari keranjang)
-	TotalHarga       int                `bson:"total_harga" json:"total_harga"`     // Total harga seluruh item
-	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`             // Tanggal transaksi
+	IDTransaksi      primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`         // ID unik transaksi
+	IDUser           primitive.ObjectID `bson:"id_user" json:"id_user"`                     // Referensi ke ID pengguna yang melakukan transaksi
+	Username         string             `bson:"username" json:"username"`                   // Username pengguna
+	Items            []CartItem         `bson:"items" json:"items"`                         // Daftar item dalam transaksi (dari keranjang)
+	TotalHarga       int                `bson:"total_harga" json:"total_harga"`             // Total harga seluruh item
+	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`               // Tanggal transaksi
 	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // metode pembayaran
 }
 
@@ -45,8 +45,8 @@ type Customer struct {
 
 // struct untuk item dalam keranjang
 type CartItem struct {
-	IDCartItem  primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`                 // ID unik untuk item keranjang
-	IDProduk    primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"`     // Referensi ke ID Produk
+	IDCartItem  primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`             // ID unik untuk item keranjang
+	IDProduk    primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"` // Referensi ke ID Produk
 	Nama_Produk string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"` //nama untuk produknya
 	Harga       int                `bson:"harga,omitempty" json:"harga,omitempty"`             // Harga produk pada saat dimasukkan ke keranjang
 	Quantity    int                `bson:"quantity,omitempty" json:"quantity,omitempty"`       // Jumlah produk dalam keranjang
