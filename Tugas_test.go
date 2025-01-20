@@ -440,6 +440,22 @@ func TestDeleteTransaksiByID(t *testing.T) {
 	}
 }
 
+func TestGetUserByID(t *testing.T) {
+	id := "678d202875bdf2c478072312" // ID dalam format string
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Fatalf("error converting id to ObjectID: %v", err)
+	}
+
+	// Memanggil GetUserByID dengan parameter yang sesuai
+	profil, err := module.GetUserByID(objectID.Hex(), module.MongoConn) // objectID.Hex() mengonversi ke string
+	if err != nil {
+		t.Fatalf("error calling GetUserByID: %v", err)
+	}
+
+	fmt.Println(profil)
+}
+
 
 // func TestGetTransaksiByID(t *testing.T) {
 // 	// Insert transaksi terlebih dahulu untuk mendapatkan ID
