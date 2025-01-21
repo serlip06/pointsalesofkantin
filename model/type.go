@@ -33,6 +33,7 @@ type Transaksi struct {
 	TotalHarga       int                `bson:"total_harga" json:"total_harga"`             // Total harga seluruh item
 	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`               // Tanggal transaksi
 	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // metode pembayaran
+	Buktipembayaran  string             `bson:"bukti_pembayaran" json:"bukti_pembayaran"`   // buktipembayaran
 }
 
 type Customer struct {
@@ -47,6 +48,7 @@ type Customer struct {
 type CartItem struct {
 	IDCartItem  primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`             // ID unik untuk item keranjang
 	IDProduk    primitive.ObjectID `bson:"id_produk,omitempty" json:"id_produk,omitempty"` // Referensi ke ID Produk
+	IDUser      primitive.ObjectID `bson:"id_user" json:"id_user"`
 	Nama_Produk string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"` //nama untuk produknya
 	Harga       int                `bson:"harga,omitempty" json:"harga,omitempty"`             // Harga produk pada saat dimasukkan ke keranjang
 	Quantity    int                `bson:"quantity,omitempty" json:"quantity,omitempty"`       // Jumlah produk dalam keranjang

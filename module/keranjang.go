@@ -37,7 +37,7 @@ func InsertDataCartItem(dbname, collection string, doc interface{}) (interface{}
 }
 
 // Fungsi untuk menambahkan item ke keranjang
-func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID, quantity int) (interface{}, error) {
+func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID,idUser primitive.ObjectID, quantity int) (interface{}, error) {
 	// Mengambil data produk berdasarkan IDProduk
 	product, err := GetProduksFromID(idProduk, db, "produk") // Menggunakan fungsi yang kamu buat
 	if err != nil {
@@ -50,6 +50,7 @@ func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID, qua
 	// Buat item keranjang
 	var cartItem model.CartItem
 	cartItem.IDProduk = idProduk
+	cartItem.IDUser = idUser 
 	cartItem.Harga = product.Harga
 	cartItem.Quantity = quantity
 	cartItem.SubTotal = subTotal
@@ -94,6 +95,7 @@ func GetAllCartItems() (cartitems []model.CartItem) {
 		return nil
 	}
 
+
 	// Mengakses collection dari database yang berhasil terhubung
 	collection := db.Collection("cart_items")
 
@@ -125,8 +127,8 @@ func GetAllCartItems() (cartitems []model.CartItem) {
 }
 
 // Update cart item
-func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID, nama string, harga int, quantity int, gambar string) error {
-	filter := bson.M{"_id": id}
+func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID,idUser, nama string, harga int, quantity int, gambar string) error {
+	filter := bson.M{"_id": id, "id_user" : idUser}// fitler untuk user
 	update := bson.M{
 		"$set": bson.M{
 			"nama":      nama,
@@ -149,9 +151,9 @@ func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID, nama 
 }
 
 // Delete cart item
-func DeleteCartItemByID(_id primitive.ObjectID, db *mongo.Database, col string) error {
+func DeleteCartItemByID(_id primitive.ObjectID,idUser, db *mongo.Database, col string) error {
 	collection := db.Collection(col)
-	filter := bson.M{"_id": _id}
+	filter := bson.M{"_id": _id, "id_user" : idUser}// filter untuk user 
 
 	result, err := collection.DeleteOne(context.TODO(), filter)
 	if err != nil {
@@ -166,11 +168,11 @@ func DeleteCartItemByID(_id primitive.ObjectID, db *mongo.Database, col string) 
 }
 
 //logika untuk chartitem jaga jaga aja 
-func InsertOrUpdateCartItem(db *mongo.Database, idProduk primitive.ObjectID, quantity int) (interface{}, error) {
+func InsertOrUpdateCartItem(db *mongo.Database, idProduk, idUser primitive.ObjectID, quantity int) (interface{}, error) {
 	collection := db.Collection("cart_items")
 
-	// Cek apakah produk dengan IDProduk yang sama sudah ada di keranjang
-	filter := bson.M{"id_produk": idProduk}
+	// Cek apakah produk dengan IDProduk dan IDUser yang sama sudah ada di keranjang
+	filter := bson.M{"id_produk": idProduk, "id_user": idUser}
 	var existingItem model.CartItem
 	err := collection.FindOne(context.TODO(), filter).Decode(&existingItem)
 
@@ -189,6 +191,7 @@ func InsertOrUpdateCartItem(db *mongo.Database, idProduk primitive.ObjectID, qua
 			newItem := model.CartItem{
 				IDCartItem:  primitive.NewObjectID(),
 				IDProduk:    idProduk,
+				IDUser:      idUser, // Tambahkan IDUser
 				Nama_Produk: product.Nama_Produk,
 				Harga:       product.Harga,
 				Quantity:    quantity,
@@ -224,6 +227,7 @@ func InsertOrUpdateCartItem(db *mongo.Database, idProduk primitive.ObjectID, qua
 
 	return existingItem.IDCartItem, nil
 }
+
 
 
 // ini filter untuk kategorinya 

@@ -135,22 +135,22 @@ func TestInsertDataCartItemFunc(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Gunakan ID produk yang valid dan sesuaikan dengan format ObjectID
-	idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // id produk : ayam bakar
-	if err != nil {
-		t.Fatalf("Invalid ObjectID: %v", err)
-	}
+	idProduk, err := primitive.ObjectIDFromHex("673c90cd715120ed663eb984") // ID produk: ayam bakar
+	assert.NoError(t, err)
 
-	// Pastikan ID tersebut ada di database
+	// Gunakan ID pengguna yang valid
+	idUser, err := primitive.ObjectIDFromHex("678f3dec6c07fa5fb07d8e3a") // Contoh ID pengguna serli
+	assert.NoError(t, err)
+
+	// Pastikan ID produk tersebut ada di database
 	collection := db.Collection("produk")
 	var product model.Produk
 	err = collection.FindOne(context.TODO(), bson.M{"_id": idProduk}).Decode(&product)
-	if err != nil {
-		t.Fatalf("Product with ID %v not found: %v", idProduk, err)
-	}
+	assert.NoError(t, err)
 
 	// Lanjutkan dengan pengujian InsertDataCartItemFunc
 	quantity := 2
-	result, err := module.InsertDataCartItemFunc(db, idProduk, quantity)
+	result, err := module.InsertDataCartItemFunc(db, idProduk, idUser, quantity)
 
 	// Verifikasi hasil
 	assert.NoError(t, err)
@@ -186,22 +186,22 @@ func TestGetAllCartItems(t *testing.T) {
 
 // deletecartitem
 func TestDeleteCartItemFromID(t *testing.T) {
-	id := "6770f80a419da98516ba7db1" //id yang akan dihapus ini pake id yang ikan bakar
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		t.Fatalf("error converting id to ObjectID: %v", err)
-	}
-	err = module.DeleteCartItemByID(objectID, module.MongoConn, "cart_items")
-	if err != nil {
-		t.Fatalf("error calling DeleteCartItemFromID: %v", err)
-	}
+	db, err := module.MongoConnectdatabase("kantin") // Nama database yang benar
+	assert.NoError(t, err)
 
-	// Verifikasi bahwa data telah dihapus dengan melakukan pengecekan menggunakan Getprodukfrom id
-	_, err = module.GetCartItemFromID(objectID, module.MongoConn, "cart_items")
-	if err == nil {
-		t.Fatalf("expected data to be deleted, but it still exists")
-	}
+	id := "6770f80a419da98516ba7db1" // ID item keranjang: ikan bakar
+	objectID, err := primitive.ObjectIDFromHex(id)
+	assert.NoError(t, err)
+
+	// Panggil fungsi DeleteCartItemByID dengan semua parameter yang diperlukan
+	err = module.DeleteCartItemByID(objectID, db, db, "cart_items")
+	assert.NoError(t, err)
+
+	// Verifikasi bahwa data telah dihapus dengan pengecekan menggunakan GetCartItemFromID
+	_, err = module.GetCartItemFromID(objectID, db, "cart_items")
+	assert.Error(t, err) // Harus menghasilkan error karena data sudah dihapus
 }
+
 
 // test untuk pesanan
 
@@ -349,6 +349,7 @@ func TestInsertTransaksi(t *testing.T) {
 
 	username := "Serli" // Ganti dengan username yang sesuai
 	metodePembayaran := "Bayar Langsung"
+	buktiPembayaran := "https://i.pinimg.com/736x/95/f8/f0/95f8f07eaf103282dbd9518ab8175931.jpg" //link  gambar bukti pembayaran 
 
 	// Mock data untuk item keranjang
 	items := []model.CartItem{
@@ -373,7 +374,7 @@ func TestInsertTransaksi(t *testing.T) {
 	}
 
 	// Panggil fungsi InsertTransaksi
-	insertedID, err := module.InsertTransaksi(idUser, username, items, metodePembayaran)
+	insertedID, err := module.InsertTransaksi(idUser, username, items, metodePembayaran, buktiPembayaran)
 	if err != nil {
 		t.Errorf("Error inserting transaksi: %v", err)
 		return
