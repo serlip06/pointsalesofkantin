@@ -55,7 +55,7 @@ func InsertTransaksiToDatabase(dbName, collectionName string, data interface{}) 
 }
 
 // Fungsi untuk menambahkan transaksi baru
-func InsertTransaksi(idUser primitive.ObjectID, username string, items []model.CartItem, metodePembayaran string, buktiPembayaran string) (interface{}, error) {
+func InsertTransaksi(idUser primitive.ObjectID, username string, items []model.CartItem, metodePembayaran string, buktiPembayaran string, status string, alamat string) (interface{}, error) {
 	// Validasi Items tidak boleh kosong
 	if len(items) == 0 {
 		return nil, fmt.Errorf("items cannot be empty")
@@ -74,6 +74,8 @@ func InsertTransaksi(idUser primitive.ObjectID, username string, items []model.C
 	transaksi.MetodePembayaran = metodePembayaran   // Masukkan metode pembayaran
 	transaksi.CreatedAt = time.Now()                // Masukkan timestamp transaksi
 	transaksi.Buktipembayaran = buktiPembayaran     // Masukkan buktipembayaran
+	transaksi.Status = status                       // Masukkan status dari transaksi
+	transaksi.Alamat = alamat                       // mesukkan alamat dari pengguna
 
 	// Validasi Total Harga (cek ulang jika diperlukan)
 	if transaksi.TotalHarga != calculatedTotal {
@@ -162,6 +164,8 @@ func UpdateTransaksi(db *mongo.Database, col string, id primitive.ObjectID, tran
 			"metode_pembayaran": transaksi.MetodePembayaran, // Sesuai dengan `bson:"metode_pembayaran"`
 			"created_at":        transaksi.CreatedAt,        // Sesuai dengan `bson:"created_at"`
 			"bukti_pembayaran":  transaksi.Buktipembayaran,  // Sesuai dengan `bson:"bukti_pembayaran"`
+			"status":            transaksi.Status,
+			"alamat":            transaksi.Alamat,
 		},
 	}
 

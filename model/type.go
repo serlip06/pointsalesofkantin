@@ -34,6 +34,9 @@ type Transaksi struct {
 	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`               // Tanggal transaksi
 	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // metode pembayaran
 	Buktipembayaran  string             `bson:"bukti_pembayaran" json:"bukti_pembayaran"`   // buktipembayaran
+	Status           string             `bson:"status" json:"status"`                       // status
+	Alamat           string             `bson:"alamat,omitempty" json:"alamat,omitempty"`   // alamat
+
 }
 
 type Customer struct {

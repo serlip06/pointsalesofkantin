@@ -350,6 +350,8 @@ func TestInsertTransaksi(t *testing.T) {
 	username := "Serli" // Ganti dengan username yang sesuai
 	metodePembayaran := "Bayar Langsung"
 	buktiPembayaran := "https://i.pinimg.com/736x/95/f8/f0/95f8f07eaf103282dbd9518ab8175931.jpg" //link  gambar bukti pembayaran 
+	status := "pending"
+	alamat := "batujajar"
 
 	// Mock data untuk item keranjang
 	items := []model.CartItem{
@@ -374,7 +376,7 @@ func TestInsertTransaksi(t *testing.T) {
 	}
 
 	// Panggil fungsi InsertTransaksi
-	insertedID, err := module.InsertTransaksi(idUser, username, items, metodePembayaran, buktiPembayaran)
+	insertedID, err := module.InsertTransaksi(idUser, username, items, metodePembayaran, buktiPembayaran, status, alamat)
 	if err != nil {
 		t.Errorf("Error inserting transaksi: %v", err)
 		return
