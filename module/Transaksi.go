@@ -147,6 +147,54 @@ func GetAllTransaksi() ([]model.Transaksi, error) {
 	return transaksis, nil
 }
 
+// get all transaksi by user yang di filter berdasarkan data terbaru  yang masuk 
+func GetAllTransaksiByUserID(userID primitive.ObjectID) ([]model.Transaksi, error) {
+	// Slice untuk menyimpan hasil transaksi
+	var transaksis []model.Transaksi
+
+	// Menghubungkan ke database MongoDB
+	collection, err := MongoConnectDBase("kantin")
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	// Membuat filter berdasarkan ID pengguna
+	filter := bson.M{"id_user": userID}
+
+	// Mencari data di koleksi "kantin_transaksi"
+	cursor, err := collection.Collection("kantin_transaksi").Find(context.TODO(), filter)
+	if err != nil {
+		fmt.Printf("GetAllTransaksiByUserID: failed to fetch transactions: %v\n", err)
+		return nil, fmt.Errorf("failed to fetch transactions: %w", err)
+	}
+	defer cursor.Close(context.TODO())
+
+	// Iterasi hasil query untuk decoding data transaksi
+	for cursor.Next(context.TODO()) {
+		var transaksi model.Transaksi
+
+		// Decode data transaksi
+		if err := cursor.Decode(&transaksi); err != nil {
+			fmt.Printf("GetAllTransaksiByUserID: failed to decode transaction: %v\n", err)
+			continue
+		}
+
+		// Hanya tambahkan transaksi jika memiliki item dari keranjang
+		if len(transaksi.Items) > 0 {
+			transaksis = append(transaksis, transaksi)
+		}
+	}
+
+	// Periksa error pada cursor
+	if err := cursor.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating cursor: %w", err)
+	}
+
+	// Mengembalikan hasil transaksi yang difilter
+	return transaksis, nil
+}
+
+
 // update dan delete
 
 // update transaksi
