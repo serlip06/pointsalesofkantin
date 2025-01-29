@@ -117,7 +117,44 @@ func GetTransaksiByID(transaksiID primitive.ObjectID) (model.Transaksi, error) {
 	return transaksi, nil
 }
 
+
+func GetAllTransaksiByIDUser(userID string, database *mongo.Database) ([]model.Transaksi, error) {
+    var transaksis []model.Transaksi
+
+    collection := database.Collection("kantin_transaksi")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    // Mengkonversi userID menjadi ObjectID
+    objID, err := primitive.ObjectIDFromHex(userID)
+    if err != nil {
+        return nil, fmt.Errorf("invalid user ID format: %v", err)
+    }
+
+    filter := bson.M{"id_user": objID}
+    cursor, err := collection.Find(ctx, filter)
+    if err != nil {
+        return nil, err
+    }
+
+    defer cursor.Close(ctx)
+
+    for cursor.Next(ctx) {
+        var transaksi model.Transaksi
+        if err := cursor.Decode(&transaksi); err != nil {
+            return nil, err
+        }
+        transaksis = append(transaksis, transaksi)
+    }
+
+    return transaksis, nil
+}
+
+
 // Fungsi untuk mendapatkan semua transaksi
+
+// get all transaksi by user yang di filter berdasarkan data terbaru  yang masuk 
+
 func GetAllTransaksi() ([]model.Transaksi, error) {
 	var transaksis []model.Transaksi
 	collection, err := MongoConnectDBase("kantin")
@@ -146,54 +183,6 @@ func GetAllTransaksi() ([]model.Transaksi, error) {
 	}
 	return transaksis, nil
 }
-
-// get all transaksi by user yang di filter berdasarkan data terbaru  yang masuk 
-func GetAllTransaksiByUserID(userID primitive.ObjectID) ([]model.Transaksi, error) {
-	// Slice untuk menyimpan hasil transaksi
-	var transaksis []model.Transaksi
-
-	// Menghubungkan ke database MongoDB
-	collection, err := MongoConnectDBase("kantin")
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
-	}
-
-	// Membuat filter berdasarkan ID pengguna
-	filter := bson.M{"id_user": userID}
-
-	// Mencari data di koleksi "kantin_transaksi"
-	cursor, err := collection.Collection("kantin_transaksi").Find(context.TODO(), filter)
-	if err != nil {
-		fmt.Printf("GetAllTransaksiByUserID: failed to fetch transactions: %v\n", err)
-		return nil, fmt.Errorf("failed to fetch transactions: %w", err)
-	}
-	defer cursor.Close(context.TODO())
-
-	// Iterasi hasil query untuk decoding data transaksi
-	for cursor.Next(context.TODO()) {
-		var transaksi model.Transaksi
-
-		// Decode data transaksi
-		if err := cursor.Decode(&transaksi); err != nil {
-			fmt.Printf("GetAllTransaksiByUserID: failed to decode transaction: %v\n", err)
-			continue
-		}
-
-		// Hanya tambahkan transaksi jika memiliki item dari keranjang
-		if len(transaksi.Items) > 0 {
-			transaksis = append(transaksis, transaksi)
-		}
-	}
-
-	// Periksa error pada cursor
-	if err := cursor.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating cursor: %w", err)
-	}
-
-	// Mengembalikan hasil transaksi yang difilter
-	return transaksis, nil
-}
-
 
 // update dan delete
 
@@ -280,4 +269,44 @@ func DeleteTransaksiByID(_id primitive.ObjectID, db *mongo.Database, col string)
 
 // 	// Memasukkan ke database
 // 	return InsertOneDoc("kantin", "kantin_transaksi", transaksi)
+// }
+
+//cadangan 
+// func GetAllTransaksiByIDUser(idUser string, db *mongo.Database) ([]model.CartItem, error) {
+// 	// Konversi idUser ke ObjectID
+// 	objectID, err := primitive.ObjectIDFromHex(idUser)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("invalid id_user: %v", err)
+// 	}
+
+// 	// Buat koleksi transaksi
+// 	collection := db.Collection("kantin_transaksi")
+
+// 	// Filter berdasarkan id_user
+// 	filter := bson.M{"id_user": objectID}
+
+// 	// Cari semua transaksi dengan id_user tertentu
+// 	cursor, err := collection.Find(context.TODO(), filter)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to fetch transactions: %v", err)
+// 	}
+// 	defer cursor.Close(context.TODO())
+
+// 	var items []model.CartItem
+// 	for cursor.Next(context.TODO()) {
+// 		var transaksi model.Transaksi
+// 		if err := cursor.Decode(&transaksi); err != nil {
+// 			fmt.Printf("failed to decode transaksi: %v\n", err)
+// 			continue
+// 		}
+// 		// Tambahkan semua items dari transaksi ini ke hasil akhir
+// 		items = append(items, transaksi.Items...)
+// 	}
+
+// 	// Cek error setelah iterasi
+// 	if err := cursor.Err(); err != nil {
+// 		return nil, fmt.Errorf("cursor error: %v", err)
+// 	}
+
+// 	return items, nil
 // }

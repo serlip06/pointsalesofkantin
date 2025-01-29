@@ -345,6 +345,7 @@ func TestInsertTransaksi(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error converting ObjectID: %v\n", err)
 		return
+
 	}
 
 	username := "Serli" // Ganti dengan username yang sesuai
@@ -458,6 +459,81 @@ func TestGetUserByID(t *testing.T) {
 
 	fmt.Println(profil)
 }
+
+// Unit Test get transaksi by userid 
+
+func TestGetAllTransaksiByIDUser(t *testing.T) {
+	// Gunakan ID user yang valid
+	userID := "678cfa508c2198269380a72a" // Ganti dengan IDUser yang sesuai
+	
+	// Menggunakan koneksi yang sudah didefinisikan di config.go
+	db := module.MongoConn.Client().Database("kantin") // Menggunakan database "kantin" yang sudah ada dalam konfigurasi
+
+	// Memanggil fungsi untuk mengambil transaksi berdasarkan userID
+	transaksis, err := module.GetAllTransaksiByIDUser(userID, db)
+	if err != nil {
+		t.Errorf("Error retrieving transactions: %v", err)
+		return
+	}
+
+	if len(transaksis) == 0 {
+		t.Errorf("No transactions found for user ID: %v", userID)
+	} else {
+		fmt.Printf("Transactions for user ID %v: %+v\n", userID, transaksis)
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// func TestGetAllTransaksiByIDUser(t *testing.T) {
+// 	// ID User dalam format string
+// 	id := "678cfa508c2198269380a72a"
+
+// 	// Dapatkan database yang sudah terkoneksi
+// 	database, err := MongoConnectDBase("kantin") // Fungsi untuk menghubungkan ke database
+// 	if err != nil {
+// 		t.Fatalf("error connecting to database: %v", err)
+// 	}
+
+// 	// Memanggil fungsi GetAllTransaksiByIDUser dengan argumen string dan database
+// 	transaksis, err := module.GetAllTransaksiByIDUser(id, database) // Gunakan id (string) dan database
+// 	if err != nil {
+// 		t.Fatalf("error calling GetAllTransaksiByIDUser: %v", err)
+// 	}
+
+// 	// Memeriksa apakah transaksi ditemukan
+// 	if len(transaksis) == 0 {
+// 		t.Fatalf("no transactions found for user ID: %v", id)
+// 	}
+
+// 	// Iterasi melalui setiap transaksi
+// 	for _, transaksi := range transaksis {
+// 		// Menampilkan detail transaksi
+// 		t.Logf("Transaksi ID: %s, Total Harga: %d, Metode Pembayaran: %s, Status: %s, Created At: %v\n",
+// 			transaksi.IDTransaksi.Hex(), transaksi.TotalHarga, transaksi.MetodePembayaran, transaksi.Status, transaksi.CreatedAt)
+
+// 		// Iterasi melalui item dalam transaksi (CartItem)
+// 		for _, item := range transaksi.Items {
+// 			t.Logf("  - Nama Produk: %s, Harga: %d, Quantity: %d, Sub Total: %d\n",
+// 				item.Nama_Produk, item.Harga, item.Quantity, item.SubTotal)
+// 		}
+// 	}
+// }
+
+
+
 
 
 // func TestGetTransaksiByID(t *testing.T) {
