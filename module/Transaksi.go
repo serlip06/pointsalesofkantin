@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/serlip06/pointsalesofkantin/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"net/http"
 )
 
 // Fungsi untuk koneksi ke database MongoDB
@@ -22,21 +24,6 @@ func MongoConnectDBase(dbname string) (*mongo.Database, error) {
 	return client.Database(dbname), nil
 }
 
-// func InsertTransaksiToDatabase(collectionName string, collectionType string, data interface{}) (interface{}, error) {
-// 	// Dapatkan koneksi database
-// 	collection, err := MongoConnectDBase("kantin")
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to connect to database: %w", err)
-// 	}
-
-// 	// Memasukkan data ke dalam koleksi "kantin_transaksi"
-// 	result, err := collection.Collection(collectionName).InsertOne(context.TODO(), data)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to insert document: %w", err)
-// 	}
-
-//		return result.InsertedID, nil
-//	}
 func InsertTransaksiToDatabase(dbName, collectionName string, data interface{}) (interface{}, error) {
 	// Mendapatkan koneksi database MongoDB
 	collection, err := MongoConnectDBase(dbName)
@@ -55,40 +42,90 @@ func InsertTransaksiToDatabase(dbName, collectionName string, data interface{}) 
 }
 
 // Fungsi untuk menambahkan transaksi baru
-func InsertTransaksi(idUser primitive.ObjectID, username string, items []model.CartItem, metodePembayaran string, buktiPembayaran string, status string, alamat string) (interface{}, error) {
-	// Validasi Items tidak boleh kosong
-	if len(items) == 0 {
-		return nil, fmt.Errorf("items cannot be empty")
-	}
+func InsertTransaksi(db *mongo.Database, idUser primitive.ObjectID, idCartItems []primitive.ObjectID, metodePembayaran, buktiPembayaran, status, alamat string) (interface{}, error) {
+	// Ambil item dari cart berdasarkan ID yang dipilih
+	collectionCart := db.Collection("cart_items")
+	filter := bson.M{"_id": bson.M{"$in": idCartItems}}
 
-	// Hitung total harga
-	calculatedTotal := calculateTotalHarga(items)
-
-	// Buat objek transaksi
-	var transaksi model.Transaksi
-	transaksi.IDTransaksi = primitive.NewObjectID() // Generate ID transaksi baru
-	transaksi.IDUser = idUser                       // Masukkan ID user
-	transaksi.Username = username                   // Masukkan username user
-	transaksi.Items = items                         // Masukkan data cart item
-	transaksi.TotalHarga = calculatedTotal          // Set total harga
-	transaksi.MetodePembayaran = metodePembayaran   // Masukkan metode pembayaran
-	transaksi.CreatedAt = time.Now()                // Masukkan timestamp transaksi
-	transaksi.Buktipembayaran = buktiPembayaran     // Masukkan buktipembayaran
-	transaksi.Status = status                       // Masukkan status dari transaksi
-	transaksi.Alamat = alamat                       // mesukkan alamat dari pengguna
-
-	// Validasi Total Harga (cek ulang jika diperlukan)
-	if transaksi.TotalHarga != calculatedTotal {
-		return nil, fmt.Errorf("total price mismatch: expected %d, got %d", calculatedTotal, transaksi.TotalHarga)
-	}
-
-	// Masukkan transaksi ke database
-	result, err := InsertTransaksiToDatabase("kantin", "kantin_transaksi", transaksi)
+	cursor, err := collectionCart.Find(context.TODO(), filter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert transaction: %w", err)
+		return nil, fmt.Errorf("failed to retrieve selected cart items: %v", err)
+	}
+	defer cursor.Close(context.TODO())
+
+	// Simpan item dalam slice
+	var items []model.CartItem
+	for cursor.Next(context.TODO()) {
+		var item model.CartItem
+		if err := cursor.Decode(&item); err != nil {
+			return nil, fmt.Errorf("error decoding cart item: %v", err)
+		}
+		items = append(items, item)
 	}
 
-	return result, nil
+	// Pastikan ada item yang valid
+	if len(items) == 0 {
+		return nil, fmt.Errorf("no valid cart items found for checkout")
+	}
+
+	// Hitung total harga transaksi
+	totalHarga := calculateTotalHarga(items)
+
+	// Buat data transaksi
+	transaksi := model.Transaksi{
+		IDTransaksi:      primitive.NewObjectID(),
+		IDUser:           idUser,
+		IDCartItem:       idCartItems,
+		MetodePembayaran: metodePembayaran,
+		TotalHarga:       totalHarga,
+		BuktiPembayaran:  buktiPembayaran,
+		Alamat:           alamat,
+		CreatedAt:        time.Now(),
+		Status:           status,
+	}
+
+	// Simpan transaksi ke koleksi "kantin_transaksi"
+	collectionTransaksi := db.Collection("kantin_transaksi")
+	result, err := collectionTransaksi.InsertOne(context.TODO(), transaksi)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert transaction: %v", err)
+	}
+
+	// Hapus hanya item yang telah di-checkout dari cart
+	_, err = collectionCart.DeleteMany(context.TODO(), filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to clear selected cart items: %v", err)
+	}
+
+	return result.InsertedID, nil
+}
+
+// handler transaksi untuk request
+func CheckoutHandler(c *gin.Context) {
+	var req model.TransaksiRequest
+
+	// Bind request JSON ke struct
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Ambil koneksi database
+	db, err := MongoConnectDBase("kantin")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to database"})
+		return
+	}
+
+	// Panggil fungsi transaksi dengan data dari request
+	result, err := InsertTransaksi(db, req.IDUser, req.IDCartItems, req.MetodePembayaran, req.BuktiPembayaran, req.Status, req.Alamat)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Response jika berhasil
+	c.JSON(http.StatusOK, gin.H{"message": "Transaction successful", "transaction_id": result})
 }
 
 // Fungsi untuk menghitung total harga
@@ -117,43 +154,41 @@ func GetTransaksiByID(transaksiID primitive.ObjectID) (model.Transaksi, error) {
 	return transaksi, nil
 }
 
-
 func GetAllTransaksiByIDUser(userID string, database *mongo.Database) ([]model.Transaksi, error) {
-    var transaksis []model.Transaksi
+	var transaksis []model.Transaksi
 
-    collection := database.Collection("kantin_transaksi")
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	collection := database.Collection("kantin_transaksi")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    // Mengkonversi userID menjadi ObjectID
-    objID, err := primitive.ObjectIDFromHex(userID)
-    if err != nil {
-        return nil, fmt.Errorf("invalid user ID format: %v", err)
-    }
+	// Mengkonversi userID menjadi ObjectID
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID format: %v", err)
+	}
 
-    filter := bson.M{"id_user": objID}
-    cursor, err := collection.Find(ctx, filter)
-    if err != nil {
-        return nil, err
-    }
+	filter := bson.M{"id_user": objID}
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
 
-    defer cursor.Close(ctx)
+	defer cursor.Close(ctx)
 
-    for cursor.Next(ctx) {
-        var transaksi model.Transaksi
-        if err := cursor.Decode(&transaksi); err != nil {
-            return nil, err
-        }
-        transaksis = append(transaksis, transaksi)
-    }
+	for cursor.Next(ctx) {
+		var transaksi model.Transaksi
+		if err := cursor.Decode(&transaksi); err != nil {
+			return nil, err
+		}
+		transaksis = append(transaksis, transaksi)
+	}
 
-    return transaksis, nil
+	return transaksis, nil
 }
-
 
 // Fungsi untuk mendapatkan semua transaksi
 
-// get all transaksi by user yang di filter berdasarkan data terbaru  yang masuk 
+// get all transaksi by user yang di filter berdasarkan data terbaru  yang masuk
 
 func GetAllTransaksi() ([]model.Transaksi, error) {
 	var transaksis []model.Transaksi
@@ -187,36 +222,32 @@ func GetAllTransaksi() ([]model.Transaksi, error) {
 // update dan delete
 
 // update transaksi
-func UpdateTransaksi(db *mongo.Database, col string, id primitive.ObjectID, transaksi model.Transaksi) (err error) {
-	// Membuat filter untuk mencocokkan ID transaksi yang akan diupdate
+func UpdateTransaksi(db *mongo.Database, id primitive.ObjectID, transaksi model.Transaksi) error {
+	// Filter transaksi berdasarkan ID
 	filter := bson.M{"_id": id}
 
-	// Menyiapkan data update
+	// Data yang akan diupdate
 	update := bson.M{
 		"$set": bson.M{
-			"id_user":           transaksi.IDUser,           // Sesuai dengan `bson:"id_user"`
-			"username":          transaksi.Username,         // Sesuai dengan `bson:"username"`
-			"items":             transaksi.Items,            // Sesuai dengan `bson:"items"`
-			"total_harga":       transaksi.TotalHarga,       // Sesuai dengan `bson:"total_harga"`
-			"metode_pembayaran": transaksi.MetodePembayaran, // Sesuai dengan `bson:"metode_pembayaran"`
-			"created_at":        transaksi.CreatedAt,        // Sesuai dengan `bson:"created_at"`
-			"bukti_pembayaran":  transaksi.Buktipembayaran,  // Sesuai dengan `bson:"bukti_pembayaran"`
+			"id_user":           transaksi.IDUser,
+			"id_cartitem":       transaksi.IDCartItem,
+			"metode_pembayaran": transaksi.MetodePembayaran,
+			"bukti_pembayaran":  transaksi.BuktiPembayaran,
 			"status":            transaksi.Status,
 			"alamat":            transaksi.Alamat,
+			"created_at":        transaksi.CreatedAt, // Jika tanggal diperbarui juga
 		},
 	}
 
-	// Melakukan update pada koleksi transaksi
-	result, err := db.Collection(col).UpdateOne(context.Background(), filter, update)
+	// Lakukan update
+	result, err := db.Collection("kantin_transaksi").UpdateOne(context.Background(), filter, update)
 	if err != nil {
-		fmt.Printf("UpdateTransaksi: %v\n", err)
-		return
+		return fmt.Errorf("failed to update transaction: %w", err)
 	}
 
-	// Mengecek jika tidak ada data yang diubah
+	// Jika tidak ada data yang diperbarui
 	if result.ModifiedCount == 0 {
-		err = fmt.Errorf("no data has been changed with the specified ID")
-		return
+		return fmt.Errorf("no transaction updated")
 	}
 
 	return nil
@@ -241,6 +272,82 @@ func DeleteTransaksiByID(_id primitive.ObjectID, db *mongo.Database, col string)
 }
 
 // cadangan
+
+// func InsertTransaksi(db *mongo.Database, idUser primitive.ObjectID, metodePembayaran string, buktiPembayaran string, status string, alamat string) (interface{}, error) {
+// 	// Ambil semua item dari keranjang user
+// 	collectionCart := db.Collection("cart_items")
+// 	filter := bson.M{"id_user": idUser}
+// 	cursor, err := collectionCart.Find(context.TODO(), filter)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to retrieve cart items: %v", err)
+// 	}
+// 	defer cursor.Close(context.TODO())
+
+// 	// Inisialisasi slice untuk menyimpan item transaksi
+// 	var items []model.CartItem
+// 	var idCartItems []primitive.ObjectID // Simpan IDCartItem dari item dalam keranjang
+
+// 	for cursor.Next(context.TODO()) {
+// 		var item model.CartItem
+// 		if err := cursor.Decode(&item); err != nil {
+// 			return nil, fmt.Errorf("error decoding cart item: %v", err)
+// 		}
+// 		items = append(items, item)
+// 		idCartItems = append(idCartItems, item.IDCartItem) // Simpan hanya IDCartItem
+// 	}
+
+// 	// Pastikan ada item dalam keranjang
+// 	if len(items) == 0 {
+// 		return nil, fmt.Errorf("cart is empty, cannot proceed with transaction")
+// 	}
+
+// 	// Hitung total harga menggunakan fungsi calculateTotalHarga
+// 	totalHarga := calculateTotalHarga(items)
+
+// 	// Buat data transaksi baru
+// 	transaksi := model.Transaksi{
+// 		IDTransaksi:      primitive.NewObjectID(),
+// 		IDUser:           idUser,
+// 		IDCartItem:       idCartItems, // Simpan semua IDCartItem dalam bentuk slice
+// 		MetodePembayaran: metodePembayaran,
+// 		TotalHarga:       totalHarga,
+// 		BuktiPembayaran:  buktiPembayaran,
+// 		Alamat:           alamat,
+// 		CreatedAt:        time.Now(),
+// 		Status:           status,
+// 	}
+
+// 	// Simpan transaksi ke koleksi "kantin_transaksi"
+// 	collectionTransaksi := db.Collection("kantin_transaksi")
+// 	result, err := collectionTransaksi.InsertOne(context.TODO(), transaksi)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to insert transaction: %v", err)
+// 	}
+
+// 	// Hapus item dari keranjang setelah transaksi berhasil
+// 	_, err = collectionCart.DeleteMany(context.TODO(), filter)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to clear cart: %v", err)
+// 	}
+
+// 	return result.InsertedID, nil
+// }
+
+// func InsertTransaksiToDatabase(collectionName string, collectionType string, data interface{}) (interface{}, error) {
+// 	// Dapatkan koneksi database
+// 	collection, err := MongoConnectDBase("kantin")
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to connect to database: %w", err)
+// 	}
+
+// 	// Memasukkan data ke dalam koleksi "kantin_transaksi"
+// 	result, err := collection.Collection(collectionName).InsertOne(context.TODO(), data)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to insert document: %w", err)
+// 	}
+
+//		return result.InsertedID, nil
+//	}
 
 // func calculateTotalHarga(items []model.CartItem) int {
 // 	total := 0
@@ -271,7 +378,7 @@ func DeleteTransaksiByID(_id primitive.ObjectID, db *mongo.Database, col string)
 // 	return InsertOneDoc("kantin", "kantin_transaksi", transaksi)
 // }
 
-//cadangan 
+//cadangan
 // func GetAllTransaksiByIDUser(idUser string, db *mongo.Database) ([]model.CartItem, error) {
 // 	// Konversi idUser ke ObjectID
 // 	objectID, err := primitive.ObjectIDFromHex(idUser)

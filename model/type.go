@@ -5,14 +5,6 @@ import (
 	"time"
 )
 
-// type Pelanggan struct {
-// 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-// 	Nama         string             `bson:"nama,omitempty" json:"nama,omitempty"`
-// 	Phone_number string             `bson:"phone_number,omitempty" json:"phone_number,omitempty"`
-// 	Alamat       string             `bson:"alamat,omitempty" json:"alamat,omitempty"`
-// 	Email        []string           `bson:"email,omitempty" json:"email,omitempty"`
-// }
-
 type Produk struct {
 	IDProduk    primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Nama_Produk string             `bson:"nama_produk,omitempty" json:"nama_produk,omitempty"`
@@ -27,16 +19,24 @@ type Produk struct {
 // struct transaksi
 type Transaksi struct {
 	IDTransaksi      primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`         // ID unik transaksi
-	IDUser           primitive.ObjectID `bson:"id_user" json:"id_user"`                     // Referensi ke ID pengguna yang melakukan transaksi
-	Username         string             `bson:"username" json:"username"`                   // Username pengguna
-	Items            []CartItem         `bson:"items" json:"items"`                         // Daftar item dalam transaksi (dari keranjang)
-	TotalHarga       int                `bson:"total_harga" json:"total_harga"`             // Total harga seluruh item
-	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`               // Tanggal transaksi
-	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // metode pembayaran
-	Buktipembayaran  string             `bson:"bukti_pembayaran" json:"bukti_pembayaran"`   // buktipembayaran
-	Status           string             `bson:"status" json:"status"`                       // status
-	Alamat           string             `bson:"alamat,omitempty" json:"alamat,omitempty"`   // alamat
+	IDUser           primitive.ObjectID `bson:"id_user" json:"id_user"`                     // Referensi ke ID pengguna
+	IDCartItem       []primitive.ObjectID `bson:"id_cartitem" json:"id_cartitem"`           // Referensi ke ID CartItem
+	TotalHarga       int                `bson:"total_harga" json:"total_harga"`             // Total harga (dihitung otomatis)
+	CreatedAt        time.Time          `bson:"created_at" json:"created_at"`               // Waktu transaksi
+	MetodePembayaran string             `bson:"metode_pembayaran" json:"metode_pembayaran"` // Metode pembayaran
+	BuktiPembayaran  string             `bson:"bukti_pembayaran" json:"bukti_pembayaran"`   // Bukti pembayaran
+	Status           string             `bson:"status" json:"status"`                       // Status transaksi
+	Alamat           string             `bson:"alamat,omitempty" json:"alamat,omitempty"`   // Alamat pengiriman
+}
 
+//transaksi request 
+type TransaksiRequest struct {
+	IDUser           primitive.ObjectID   `json:"id_user" binding:"required"`
+	IDCartItems      []primitive.ObjectID `json:"id_cartitems" binding:"required"`
+	MetodePembayaran string               `json:"metode_pembayaran" binding:"required"`
+	BuktiPembayaran  string               `json:"bukti_pembayaran"`
+	Status           string               `json:"status" binding:"required"`
+	Alamat           string               `json:"alamat"`
 }
 
 type Customer struct {
@@ -57,6 +57,8 @@ type CartItem struct {
 	Quantity    int                `bson:"quantity,omitempty" json:"quantity,omitempty"`       // Jumlah produk dalam keranjang
 	SubTotal    int                `bson:"sub_total,omitempty" json:"sub_total,omitempty"`     // Total harga (Harga * Quantity)
 	Gambar      string             `bson:"gambar,omitempty" json:"gambar,omitempty"`           // Gambar produk
+	IsSelected  bool               `bson:"is_selected,omitempty" json:"is_selected,omitempty"` // Tambahkan flag ini
+	
 }
 
 type Pesanan struct {
@@ -105,29 +107,36 @@ type Response struct {
 // notifikasi
 
 // Struct untuk notifikasi produk terbaru
-type NewProductNotification struct {
-	IDProduk    string `json:"id_produk"`   // ID unik produk
-	Nama_Produk string `json:"nama_produk"` // Nama produk baru
-	Kategori    string `json:"kategori"`    // Kategori produk
-	AddedBy     string `json:"added_by"`    // Admin/Operator yang menambahkan produk
-	Timestamp   string `json:"timestamp"`   // Waktu produk ditambahkan
-	Message     string `json:"message"`     // Pesan notifikasi
-}
+// type NewProductNotification struct {
+// 	IDProduk    string `json:"id_produk"`   // ID unik produk
+// 	Nama_Produk string `json:"nama_produk"` // Nama produk baru
+// 	Kategori    string `json:"kategori"`    // Kategori produk
+// 	AddedBy     string `json:"added_by"`    // Admin/Operator yang menambahkan produk
+// 	Timestamp   string `json:"timestamp"`   // Waktu produk ditambahkan
+// 	Message     string `json:"message"`     // Pesan notifikasi
+// }
 
 // Struct untuk notifikasi stok menipis
-type LowStockNotification struct {
-	IDProduk     string `json:"id_produk"`     // ID unik produk
-	Nama_Produk  string `json:"nama_produk"`   // Nama produk
-	CurrentStock int    `json:"current_stock"` // Jumlah stok saat ini
-	Threshold    int    `json:"threshold"`     // Ambang batas stok
-	NotifiedAt   string `json:"notified_at"`   // Waktu notifikasi dibuat
-	Message      string `json:"message"`       // Pesan notifikasi
-}
+// type LowStockNotification struct {
+// 	IDProduk     string `json:"id_produk"`     // ID unik produk
+// 	Nama_Produk  string `json:"nama_produk"`   // Nama produk
+// 	CurrentStock int    `json:"current_stock"` // Jumlah stok saat ini
+// 	Threshold    int    `json:"threshold"`     // Ambang batas stok
+// 	NotifiedAt   string `json:"notified_at"`   // Waktu notifikasi dibuat
+// 	Message      string `json:"message"`       // Pesan notifikasi
+// }
 
 // Struct untuk notifikasi stok habis
-type OutOfStockNotification struct {
-	IDProduk    string `json:"id_produk"`   // ID unik produk
-	Nama_Produk string `json:"nama_produk"` // Nama produk baru
-	NotifiedAt  string `json:"notified_at"` // Waktu notifikasi dibuat
-	Message     string `json:"message"`     // Pesan notifikasi
-}
+// type OutOfStockNotification struct {
+// 	IDProduk    string `json:"id_produk"`   // ID unik produk
+// 	Nama_Produk string `json:"nama_produk"` // Nama produk baru
+// 	NotifiedAt  string `json:"notified_at"` // Waktu notifikasi dibuat
+// 	Message     string `json:"message"`     // Pesan notifikasi
+// }
+// type Pelanggan struct {
+// 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+// 	Nama         string             `bson:"nama,omitempty" json:"nama,omitempty"`
+// 	Phone_number string             `bson:"phone_number,omitempty" json:"phone_number,omitempty"`
+// 	Alamat       string             `bson:"alamat,omitempty" json:"alamat,omitempty"`
+// 	Email        []string           `bson:"email,omitempty" json:"email,omitempty"`
+// }

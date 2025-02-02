@@ -5,14 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/serlip06/pointsalesofkantin/model" // Mengimpor package model dengan benar
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 // Fungsi untuk menghubungkan ke MongoDB
-func  MongoConnectdatabase(dbname string) (*mongo.Database, error) {
+func MongoConnectdatabase(dbname string) (*mongo.Database, error) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(MongoString))
 	if err != nil {
 		fmt.Printf("MongoConnect: %v\n", err)
@@ -21,9 +22,9 @@ func  MongoConnectdatabase(dbname string) (*mongo.Database, error) {
 	return client.Database(dbname), nil
 }
 
-// Insert item ke keranjang 
+// Insert item ke keranjang
 func InsertDataCartItem(dbname, collection string, doc interface{}) (interface{}, error) {
-	insertResult, err :=  MongoConnectdatabase(dbname)
+	insertResult, err := MongoConnectdatabase(dbname)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
 	}
@@ -37,27 +38,25 @@ func InsertDataCartItem(dbname, collection string, doc interface{}) (interface{}
 }
 
 // Fungsi untuk menambahkan item ke keranjang
-func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID,idUser primitive.ObjectID, quantity int) (interface{}, error) {
-	// Mengambil data produk berdasarkan IDProduk
-	product, err := GetProduksFromID(idProduk, db, "produk") // Menggunakan fungsi yang kamu buat
+func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID, idUser primitive.ObjectID, quantity int) (interface{}, error) {
+	product, err := GetProduksFromID(idProduk, db, "produk")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get product: %v", err)
 	}
 
-	// Menghitung subtotal
 	subTotal := product.Harga * quantity
 
-	// Buat item keranjang
 	var cartItem model.CartItem
+	cartItem.IDCartItem = primitive.NewObjectID()
 	cartItem.IDProduk = idProduk
-	cartItem.IDUser = idUser 
+	cartItem.IDUser = idUser
 	cartItem.Harga = product.Harga
 	cartItem.Quantity = quantity
 	cartItem.SubTotal = subTotal
-	cartItem.Nama_Produk = product.Nama_Produk // Menyimpan nama produk jika diperlukan
-	cartItem.Gambar = product.Gambar// meyimpan data gambar 
+	cartItem.Nama_Produk = product.Nama_Produk
+	cartItem.Gambar = product.Gambar
+	cartItem.IsSelected = false // Defaultnya tidak dicentang
 
-	// Menyimpan item ke dalam keranjang
 	result, err := InsertDataCartItem("kantin", "cart_items", cartItem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert cart item: %v", err)
@@ -66,24 +65,101 @@ func InsertDataCartItemFunc(db *mongo.Database, idProduk primitive.ObjectID,idUs
 	return result, nil
 }
 
-// Get cart item by ID 
+// fungtion update bersasarkkan item yang di pilih
+func UpdateCartItemSelection(db *mongo.Database, idCartItems []primitive.ObjectID, isSelected bool) error {
+	collection := db.Collection("cart_items")
+	filter := bson.M{"_id": bson.M{"$in": idCartItems}}
+
+	update := bson.M{
+		"$set": bson.M{
+			"is_selected": isSelected,
+		},
+	}
+
+	_, err := collection.UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to update cart items: %v", err)
+	}
+
+	return nil
+}
+
+// funstion untuk checkout dari keranjang
+func CheckoutFromCart(db *mongo.Database, idUser primitive.ObjectID, metodePembayaran, buktiPembayaran, alamat string) (primitive.ObjectID, error) {
+	collectionCart := db.Collection("cart_items")
+	filter := bson.M{"id_user": idUser, "is_selected": true}
+
+	cursor, err := collectionCart.Find(context.TODO(), filter)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("failed to get selected cart items: %v", err)
+	}
+	defer cursor.Close(context.TODO())
+
+	var items []model.CartItem
+	var idCartItems []primitive.ObjectID
+	totalHarga := 0
+
+	for cursor.Next(context.TODO()) {
+		var item model.CartItem
+		if err := cursor.Decode(&item); err != nil {
+			return primitive.NilObjectID, fmt.Errorf("error decoding cart item: %v", err)
+		}
+		items = append(items, item)
+		idCartItems = append(idCartItems, item.IDCartItem)
+		totalHarga += item.SubTotal
+	}
+
+	// Pastikan ada item yang dipilih
+	if len(items) == 0 {
+		return primitive.NilObjectID, errors.New("no selected items to checkout")
+	}
+
+	// Buat transaksi baru
+	transaksi := model.Transaksi{
+		IDTransaksi:      primitive.NewObjectID(),
+		IDUser:           idUser,
+		IDCartItem:       idCartItems,
+		MetodePembayaran: metodePembayaran,
+		TotalHarga:       totalHarga,
+		BuktiPembayaran:  buktiPembayaran,
+		Alamat:           alamat,
+		CreatedAt:        time.Now(),
+		Status:           "Pending",
+	}
+
+	collectionTransaksi := db.Collection("kantin_transaksi")
+	_, err = collectionTransaksi.InsertOne(context.TODO(), transaksi)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("failed to create transaction: %v", err)
+	}
+
+	// Hapus item dari cart setelah transaksi berhasil
+	_, err = collectionCart.DeleteMany(context.TODO(), filter)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("failed to remove items from cart: %v", err)
+	}
+
+	return transaksi.IDTransaksi, nil
+}
+
+// Get cart item by ID
 func GetCartItemFromID(_id primitive.ObjectID, db *mongo.Database, col string) (model.CartItem, error) {
-    cartItem := model.CartItem{}
-    filter := bson.M{"_id": _id}
-    
-    fmt.Println("Looking for _id:", _id.Hex())  // Log ID yang dicari
-    
-    err := db.Collection(col).FindOne(context.TODO(), filter).Decode(&cartItem)
-    if err != nil {
-        if errors.Is(err, mongo.ErrNoDocuments) {
-            return cartItem, fmt.Errorf("no data found for ID %s", _id.Hex())
-        }
-        return cartItem, fmt.Errorf("error retrieving data for ID %s: %s", _id.Hex(), err.Error())
-    }
-    
-    fmt.Println("Found Cart Item:", cartItem)  // Log data yang ditemukan
-    
-    return cartItem, nil
+	cartItem := model.CartItem{}
+	filter := bson.M{"_id": _id}
+
+	fmt.Println("Looking for _id:", _id.Hex()) // Log ID yang dicari
+
+	err := db.Collection(col).FindOne(context.TODO(), filter).Decode(&cartItem)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return cartItem, fmt.Errorf("no data found for ID %s", _id.Hex())
+		}
+		return cartItem, fmt.Errorf("error retrieving data for ID %s: %s", _id.Hex(), err.Error())
+	}
+
+	fmt.Println("Found Cart Item:", cartItem) // Log data yang ditemukan
+
+	return cartItem, nil
 }
 
 // Get all cart items
@@ -94,7 +170,6 @@ func GetAllCartItems() (cartitems []model.CartItem) {
 		fmt.Printf("GetAllCartItem: %v\n", err)
 		return nil
 	}
-
 
 	// Mengakses collection dari database yang berhasil terhubung
 	collection := db.Collection("cart_items")
@@ -127,15 +202,15 @@ func GetAllCartItems() (cartitems []model.CartItem) {
 }
 
 // Update cart item
-func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID,idUser, nama string, harga int, quantity int, gambar string) error {
-	filter := bson.M{"_id": id, "id_user" : idUser}// fitler untuk user
+func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID, idUser, nama string, harga int, quantity int, gambar string) error {
+	filter := bson.M{"_id": id, "id_user": idUser} // fitler untuk user
 	update := bson.M{
 		"$set": bson.M{
 			"nama":      nama,
 			"harga":     harga,
 			"quantity":  quantity,
 			"sub_total": harga * quantity, // Menghitung ulang subtotal
-			"gambar":    gambar,    //mengupdate data gambar
+			"gambar":    gambar,           //mengupdate data gambar
 
 		},
 	}
@@ -151,23 +226,23 @@ func UpdateCartItem(db *mongo.Database, col string, id primitive.ObjectID,idUser
 }
 
 // Delete cart item
-func DeleteCartItemByID(_id primitive.ObjectID,idUser, db *mongo.Database, col string) error {
-	collection := db.Collection(col)
-	filter := bson.M{"_id": _id, "id_user" : idUser}// filter untuk user 
+func DeleteCartItemByID(_id primitive.ObjectID, idUser primitive.ObjectID, db *mongo.Database, col string) error {
+	collection := db.Collection("cart_items")
+	filter := bson.M{"_id": _id, "id_user": idUser}// _id dari chartitem
 
 	result, err := collection.DeleteOne(context.TODO(), filter)
 	if err != nil {
-		return fmt.Errorf("error deleting data for ID %s: %s", _id, err.Error())
+		return fmt.Errorf("error deleting cart item: %v", err)
 	}
 
 	if result.DeletedCount == 0 {
-		return fmt.Errorf("data with ID %s not found", _id)
+		return errors.New("cart item not found or does not belong to user")
 	}
 
 	return nil
 }
 
-//logika untuk chartitem jaga jaga aja 
+// logika untuk chartitem jaga jaga aja
 func InsertOrUpdateCartItem(db *mongo.Database, idProduk, idUser primitive.ObjectID, quantity int) (interface{}, error) {
 	collection := db.Collection("cart_items")
 
@@ -228,9 +303,7 @@ func InsertOrUpdateCartItem(db *mongo.Database, idProduk, idUser primitive.Objec
 	return existingItem.IDCartItem, nil
 }
 
-
-
-// ini filter untuk kategorinya 
+// ini filter untuk kategorinya
 // func GetAllCartItems(kategori string) ([]model.CartItem, error) {
 // 	collection, err :=  MongoConnectdatabase("kantin")
 // 	if err != nil {
