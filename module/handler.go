@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	//"encoding/json"
-	"golang.org/x/crypto/bcrypt"
+	//"golang.org/x/crypto/bcrypt"
 )
 
 
@@ -69,25 +69,21 @@ func ApproveRegistration(id string, db *mongo.Database) (model.PendingRegistrati
 	return pending, user, err
 }
 
-
-//register handler 
+// Register handler
 func RegisterHandler(req model.RegisterRequest, db *mongo.Database) (string, error) {
-	// Proses hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", fmt.Errorf("failed to hash password: %v", err)
-	}
+	// Simpan password mentah tanpa di-hash
+	password := req.Password
 
 	// Membuat objek registrasi
 	registration := model.PendingRegistration{
 		Username:    req.Username,
-		Password:    string(hashedPassword),
+		Password:    password,  // Simpan password dalam bentuk asli
 		Role:        req.Role,
 		SubmittedAt: time.Now(),
 	}
 
 	// Panggil fungsi untuk menyimpan data pengguna
-	err = SavePendingRegistration(registration, db)
+	err := SavePendingRegistration(registration, db)
 	if err != nil {
 		return "", fmt.Errorf("failed to save registration: %v", err)
 	}
@@ -95,6 +91,7 @@ func RegisterHandler(req model.RegisterRequest, db *mongo.Database) (string, err
 	// Return success message
 	return "Registration submitted, waiting for admin approval", nil
 }
+
 
 // function untuk memanggil data di colecction pending_registration dan user 
 // GetAllUsers retrieves all user data from the users collection

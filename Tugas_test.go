@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
+	//"golang.org/x/crypto/bcrypt"
 	//"go.mongodb.org/mongo-driver/mongo"
 	//"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -255,24 +255,24 @@ func TestCheckoutFromCart(t *testing.T) {
 	assert.Equal(t, int64(0), count)
 }
 
-// test untuk login
+//register
 func TestRegisterHandler(t *testing.T) {
 	// Setup test database
 	db := module.MongoConnectdb("kantin")
 
 	// Test case input
 	req := model.RegisterRequest{
-		Username: "testuser",
-		Password: "testpassword",
+		Username: "cello",
+		Password: "ce123",
 		Role:     "customer",
 	}
 
-	// Call the signupHandler function
+	// Call the RegisterHandler function
 	message, err := module.RegisterHandler(req, db)
 
 	// Test if there were no errors
 	if err != nil {
-		t.Errorf("Error in signupHandler: %v", err)
+		t.Errorf("Error in RegisterHandler: %v", err)
 	}
 
 	// Test if the message is as expected
@@ -294,10 +294,9 @@ func TestRegisterHandler(t *testing.T) {
 		t.Errorf("Expected username: %s, got: %s", req.Username, result.Username)
 	}
 
-	// Verify if the password is correctly hashed
-	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(req.Password))
-	if err != nil {
-		t.Fatalf("Password hash mismatch: %v", err)
+	// Verify if the password is correctly stored (in plain text)
+	if result.Password != req.Password {
+		t.Fatalf("Expected password: %s, got: %s", req.Password, result.Password)
 	}
 
 	// Print confirmation message
@@ -305,13 +304,13 @@ func TestRegisterHandler(t *testing.T) {
 }
 
 // UJICOBA APPROVE NYA
-func ApproveRegistration(t *testing.T) {
+func TestApproveRegistration(t *testing.T) {
 	// Setup test database
 	db := module.MongoConnectdb("kantin")
 
 	// Tentukan ID yang sudah ada di koleksi pending_registrations
 	// Misalnya ID sudah diketahui sebelumnya
-	existingID := "677a8fff42740fa6xxxxx" // Ganti dengan ID yang sesuai
+	existingID := "67aa36c6c0f544aeabdd877f" // Ganti dengan ID yang sesuai
 
 	// Mengonversi ID string menjadi ObjectID
 	objectID, err := primitive.ObjectIDFromHex(existingID)
